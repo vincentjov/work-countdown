@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Work Countdown</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f5f7;
+            color: #222;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            padding: 32px;
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 5px;
+            border: none;
+            border-radius: 8px;
+            background: #222;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #444;
+        }
+
+        .result {
+            margin-top: 30px;
+            text-align: center;
+            padding-top: 25px;
+            border-top: 1px solid #ddd;
+        }
+
+        .small-title {
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        #leaveTime {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+
+        #countdown {
+            font-size: 42px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        #status {
+            margin-top: 8px;
+            color: #777;
+        }
+
+        .info {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 25px;
+        }
+
+        #progressBar {
+            height: 100%;
+            width: 0%;
+            background: #222;
+            transition: width 1s;
+        }
+
+        #progressText {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #777;
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                padding: 24px;
+            }
+
+            #countdown {
+                font-size: 34px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Work Countdown</h1>
+
+    <div class="input-group">
+        <label for="arrival">Arrival time</label>
+        <input type="time" id="arrival">
+    </div>
+
+    <div class="input-group">
+        <label for="workHours">Work hours today</label>
+        <input
+            type="number"
+            id="workHours"
+            min="0"
+            step="0.25"
+            value="8"
+            placeholder="Example: 8"
+        >
+    </div>
+
+    <div class="input-group">
+        <label for="breakMinutes">Lunch / break (minutes)</label>
+        <input
+            type="number"
+            id="breakMinutes"
+            min="0"
+            value="30"
+            placeholder="Example: 30"
+        >
+    </div>
+
+    <button onclick="calculateWorkDay()">Calculate</button>
+
+    <div class="result">
+
+        <div class="small-title">You can go home at</div>
+        <div id="leaveTime">--:--</div>
+
+        <div class="small-title">Time remaining</div>
+        <div id="countdown">--:--:--</div>
+
+        <div id="status">
+            Enter your work information above.
+        </div>
+
+        <div class="progress-container">
+            <div id="progressBar"></div>
+        </div>
+
+        <div id="progressText"></div>
+
+        <div class="info" id="summary">
+            No calculation yet.
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+let leaveDate = null;
+let arrivalDate = null;
+let countdownInterval = null;
+
+
+// ----------------------------------------------------
+// Calculate leaving time
+// ----------------------------------------------------
+
+function calculateWorkDay() {
+
+    const arrivalValue =
+        document.getElementById("arrival").value;
+
+    const workHours =
+        parseFloat(document.getElementById("workHours").value);
+
+    const breakMinutes =
+        parseFloat(document.getElementById("breakMinutes").value);
+
+
+    if (!arrivalValue || isNaN(workHours) || isNaN(breakMinutes)) {
+
+        alert("Please fill in all fields.");
+
+        return;
+    }
+
+
+    // Get today's date
+    const now = new Date();
+
+    const [hours, minutes] =
+        arrivalValue.split(":").map(Number);
+
+
+    // Create arrival date/time
+    arrivalDate = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        hours,
+        minutes,
+        0
+    );
+
+
+    // Convert work hours to milliseconds
+    const workMilliseconds =
+        workHours * 60 * 60 * 1000;
+
+
+    // Convert break minutes to milliseconds
+    const breakMilliseconds =
+        breakMinutes * 60 * 1000;
+
+
+    // Leaving time =
+    // Arrival + actual working hours + break
+    leaveDate = new Date(
+        arrivalDate.getTime()
+        + workMilliseconds
+        + breakMilliseconds
+    );
+
+
+    // Display leaving time
+    document.getElementById("leaveTime").textContent =
+        formatTime(leaveDate);
+
+
+    // Summary
+    document.getElementById("summary").innerHTML =
+        `
+        Arrival: <strong>${formatTime(arrivalDate)}</strong><br>
+        Work: <strong>${formatWorkHours(workHours)}</strong><br>
+        Break: <strong>${breakMinutes} min</strong><br>
+        Leave: <strong>${formatTime(leaveDate)}</strong>
+        `;
+
+
+    // Save values
+    saveSettings();
+
+
+    // Start / restart countdown
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+    }
+
+    updateCountdown();
+
+    countdownInterval =
+        setInterval(updateCountdown, 1000);
+}
+
+
+// ----------------------------------------------------
+// Countdown
+// ----------------------------------------------------
+
+function updateCountdown() {
+
+    if (!leaveDate || !arrivalDate) {
+        return;
+    }
+
+
+    const now = new Date();
+
+    const difference =
+        leaveDate.getTime() - now.getTime();
+
+
+    // Workday hasn't started yet
+    if (now < arrivalDate) {
+
+        document.getElementById("countdown").textContent =
+            formatDuration(arrivalDate - now);
+
+        document.getElementById("status").textContent =
+            "Until your workday starts";
+
+        document.getElementById("progressBar").style.width =
+            "0%";
+
+        document.getElementById("progressText").textContent =
+            "0%";
+
+        return;
+    }
+
+
+    // Still working
+    if (difference > 0) {
+
+        document.getElementById("countdown").textContent =
+            formatDuration(difference);
+
+        document.getElementById("status").textContent =
+            "until you can go home";
+
+
+        // Progress percentage
+        const totalDay =
+            leaveDate.getTime() - arrivalDate.getTime();
+
+        const worked =
+            now.getTime() - arrivalDate.getTime();
+
+        let percentage =
+            (worked / totalDay) * 100;
+
+        percentage =
+            Math.max(0, Math.min(100, percentage));
+
+
+        document.getElementById("progressBar").style.width =
+            percentage + "%";
+
+        document.getElementById("progressText").textContent =
+            percentage.toFixed(1) + "% of the day completed";
+    }
+
+    // Finished / overtime
+    else {
+
+        const overtime =
+            Math.abs(difference);
+
+        document.getElementById("countdown").textContent =
+            "+" + formatDuration(overtime);
+
+        document.getElementById("status").textContent =
+            "You're done! Overtime";
+
+        document.getElementById("progressBar").style.width =
+            "100%";
+
+        document.getElementById("progressText").textContent =
+            "Workday completed 🎉";
+    }
+}
+
+
+// ----------------------------------------------------
+// Format HH:MM
+// ----------------------------------------------------
+
+function formatTime(date) {
+
+    return date.toLocaleTimeString(
+        [],
+        {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false
+        }
+    );
+}
+
+
+// ----------------------------------------------------
+// Format countdown
+// ----------------------------------------------------
+
+function formatDuration(milliseconds) {
+
+    const totalSeconds =
+        Math.floor(milliseconds / 1000);
+
+    const hours =
+        Math.floor(totalSeconds / 3600);
+
+    const minutes =
+        Math.floor((totalSeconds % 3600) / 60);
+
+    const seconds =
+        totalSeconds % 60;
+
+
+    return (
+        String(hours).padStart(2, "0")
+        + ":"
+        + String(minutes).padStart(2, "0")
+        + ":"
+        + String(seconds).padStart(2, "0")
+    );
+}
+
+
+// ----------------------------------------------------
+// Format decimal work hours
+// Example 7.5 -> 7h 30m
+// ----------------------------------------------------
+
+function formatWorkHours(hours) {
+
+    const wholeHours =
+        Math.floor(hours);
+
+    const minutes =
+        Math.round((hours - wholeHours) * 60);
+
+    return `${wholeHours}h ${minutes}m`;
+}
+
+
+// ----------------------------------------------------
+// Save inputs
+// ----------------------------------------------------
+
+function saveSettings() {
+
+    const data = {
+
+        date:
+            new Date().toDateString(),
+
+        arrival:
+            document.getElementById("arrival").value,
+
+        workHours:
+            document.getElementById("workHours").value,
+
+        breakMinutes:
+            document.getElementById("breakMinutes").value
+    };
+
+
+    localStorage.setItem(
+        "workCountdown",
+        JSON.stringify(data)
+    );
+}
+
+
+// ----------------------------------------------------
+// Load saved inputs
+// ----------------------------------------------------
+
+function loadSettings() {
+
+    const saved =
+        localStorage.getItem("workCountdown");
+
+
+    if (saved) {
+
+        const data =
+            JSON.parse(saved);
+
+
+        // Only automatically restore if it was saved today
+        if (data.date === new Date().toDateString()) {
+
+            document.getElementById("arrival").value =
+                data.arrival;
+
+            document.getElementById("workHours").value =
+                data.workHours;
+
+            document.getElementById("breakMinutes").value =
+                data.breakMinutes;
+
+            calculateWorkDay();
+
+            return;
+        }
+    }
+
+
+    // Otherwise use current time as default arrival
+    const now = new Date();
+
+    const hours =
+        String(now.getHours()).padStart(2, "0");
+
+    const minutes =
+        String(now.getMinutes()).padStart(2, "0");
+
+    document.getElementById("arrival").value =
+        `${hours}:${minutes}`;
+}
+
+
+// Run when page loads
+loadSettings();
+
+</script>
+
+</body>
+</html>
