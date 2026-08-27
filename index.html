@@ -1,8 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
 
     <title>Work Countdown</title>
 
@@ -13,194 +18,533 @@
 
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f5f7;
-            color: #222;
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
+            padding: 30px;
 
-        .container {
-            width: 100%;
-            max-width: 500px;
-            background: white;
-            padding: 32px;
-            border-radius: 18px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
+            background: #f2f3f5;
+            color: #1d1d1f;
         }
 
         h1 {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 28px;
+        }
+
+        .date {
+            text-align: center;
+            color: #777;
+            font-size: 13px;
+            margin-bottom: 28px;
+        }
+
+        .dashboard {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+
+            display: grid;
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+
+            gap: 24px;
+        }
+
+        .card {
+            background: white;
+            padding: 28px;
+            border-radius: 20px;
+
+            box-shadow:
+                0 8px 30px rgba(0, 0, 0, 0.08);
+
+            min-width: 0;
+        }
+
+        .person-title {
+            text-align: center;
+            font-size: 23px;
+            font-weight: 700;
             margin-top: 0;
             margin-bottom: 25px;
-            text-align: center;
         }
 
         .input-group {
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
 
         label {
             display: block;
             margin-bottom: 7px;
-            font-weight: bold;
+            font-size: 14px;
+            font-weight: 600;
         }
 
         input {
             width: 100%;
-            padding: 12px;
+            padding: 12px 13px;
             border: 1px solid #ccc;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
+            background: white;
+            min-height: 46px;
         }
 
         button {
             width: 100%;
             padding: 14px;
             margin-top: 5px;
+
             border: none;
-            border-radius: 8px;
-            background: #222;
-            color: white;
+            border-radius: 10px;
+
             font-size: 16px;
+            font-weight: 600;
+
             cursor: pointer;
         }
 
-        button:hover {
-            background: #444;
+        .start-button {
+            background: #1d1d1f;
+            color: white;
+        }
+
+        .start-button:active,
+        .feierabend-button:active {
+            transform: scale(0.99);
+        }
+
+        .feierabend-button {
+            background: #ececec;
+            color: #1d1d1f;
+
+            margin-top: 10px;
+        }
+
+        .feierabend-button:disabled {
+            opacity: 0.45;
+            cursor: default;
         }
 
         .result {
-            margin-top: 30px;
             text-align: center;
-            padding-top: 25px;
-            border-top: 1px solid #ddd;
+            margin-top: 27px;
+            border-top: 1px solid #e5e5e5;
+            padding-top: 24px;
         }
 
         .small-title {
+            font-size: 13px;
             color: #777;
-            font-size: 14px;
             margin-bottom: 5px;
         }
 
-        #leaveTime {
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 25px;
+        .leave-time {
+            font-size: 34px;
+            font-weight: 700;
+            margin-bottom: 22px;
         }
 
-        #countdown {
-            font-size: 42px;
-            font-weight: bold;
+        .countdown {
+            font-size: clamp(30px, 5vw, 46px);
+            font-weight: 750;
             letter-spacing: 1px;
+            white-space: nowrap;
         }
 
-        #status {
-            margin-top: 8px;
+        .status {
+            margin-top: 7px;
             color: #777;
+            font-size: 14px;
         }
 
-        .info {
-            margin-top: 25px;
-            padding: 15px;
-            background: #f5f5f5;
-            border-radius: 10px;
-            font-size: 14px;
-            line-height: 1.6;
+        .good-job {
+            margin-top: 15px;
+            font-size: 21px;
+            font-weight: 700;
+            display: none;
         }
 
         .progress-container {
             width: 100%;
-            height: 10px;
-            background: #ddd;
-            border-radius: 10px;
+            height: 9px;
+
+            background: #e4e4e4;
+            border-radius: 20px;
             overflow: hidden;
-            margin-top: 25px;
+            margin-top: 22px;
         }
 
-        #progressBar {
-            height: 100%;
+        .progress-bar {
             width: 0%;
-            background: #222;
-            transition: width 1s;
+            height: 100%;
+            background: #1d1d1f;
+            transition: width 1s linear;
         }
 
-        #progressText {
-            margin-top: 8px;
-            font-size: 13px;
+        .progress-text {
+            margin-top: 7px;
+            font-size: 12px;
             color: #777;
         }
 
-        @media (max-width: 500px) {
-            .container {
-                padding: 24px;
+        .summary {
+            margin-top: 20px;
+            padding: 14px;
+            border-radius: 12px;
+            background: #f5f5f7;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /*
+            iPhone / smaller screens
+        */
+
+        @media (max-width: 700px) {
+
+            body {
+                padding:
+                    max(16px, env(safe-area-inset-top))
+                    14px
+                    max(20px, env(safe-area-inset-bottom));
             }
 
-            #countdown {
-                font-size: 34px;
+            h1 {
+                font-size: 24px;
+            }
+
+            .dashboard {
+                grid-template-columns: 1fr;
+                gap: 18px;
+            }
+
+            .card {
+                padding: 22px 18px;
+                border-radius: 18px;
+            }
+
+            .person-title {
+                font-size: 21px;
+            }
+
+            .leave-time {
+                font-size: 31px;
+            }
+
+            .countdown {
+                font-size: 38px;
+            }
+        }
+
+        @media (max-width: 380px) {
+
+            .countdown {
+                font-size: 32px;
+            }
+
+            .card {
+                padding: 20px 15px;
             }
         }
     </style>
 </head>
 
+
 <body>
 
-<div class="container">
+<h1>Work Countdown</h1>
 
-    <h1>Work Countdown :-)</h1>
+<div class="date" id="todayDate"></div>
 
-    <div class="input-group">
-        <label for="arrival">Arrival time</label>
-        <input type="time" id="arrival">
-    </div>
 
-    <div class="input-group">
-        <label for="workHours">Work hours today</label>
-        <input
-            type="number"
-            id="workHours"
-            min="0"
-            step="0.25"
-            value="8"
-            placeholder="Example: 8"
-        >
-    </div>
+<div class="dashboard">
 
-    <div class="input-group">
-        <label for="breakMinutes">Lunch / break (minutes)</label>
-        <input
-            type="number"
-            id="breakMinutes"
-            min="0"
-            value="30"
-            placeholder="Example: 30"
-        >
-    </div>
+    <!-- =============================== -->
+    <!-- VINCENT -->
+    <!-- =============================== -->
 
-    <button onclick="calculateWorkDay()">Calculate</button>
+    <div class="card">
 
-    <div class="result">
+        <h2 class="person-title">
+            Vincent's Work Countdown
+        </h2>
 
-        <div class="small-title">You can go home at</div>
-        <div id="leaveTime">--:--</div>
+        <div class="input-group">
+            <label for="vincent-arrival">
+                Arrival time
+            </label>
 
-        <div class="small-title">Time remaining</div>
-        <div id="countdown">--:--:--</div>
-
-        <div id="status">
-            Enter your work information above.
+            <input
+                type="time"
+                id="vincent-arrival"
+            >
         </div>
 
-        <div class="progress-container">
-            <div id="progressBar"></div>
+
+        <div class="input-group">
+            <label for="vincent-work">
+                Work hours today
+            </label>
+
+            <input
+                type="number"
+                id="vincent-work"
+                value="8"
+                min="0"
+                step="0.25"
+            >
         </div>
 
-        <div id="progressText"></div>
 
-        <div class="info" id="summary">
-            No calculation yet.
+        <div class="input-group">
+            <label for="vincent-break">
+                Lunch / break (minutes)
+            </label>
+
+            <input
+                type="number"
+                id="vincent-break"
+                value="30"
+                min="0"
+                step="1"
+            >
+        </div>
+
+
+        <button
+            class="start-button"
+            onclick="calculateWorkDay('vincent')"
+        >
+            Start / Update Countdown
+        </button>
+
+
+        <button
+            class="feierabend-button"
+            id="vincent-feierabend-button"
+            onclick="feierabend('vincent')"
+            disabled
+        >
+            Feierabend!! 🎉
+        </button>
+
+
+        <div class="result">
+
+            <div class="small-title">
+                Planned Feierabend
+            </div>
+
+            <div
+                class="leave-time"
+                id="vincent-leave"
+            >
+                --:--
+            </div>
+
+
+            <div class="small-title">
+                Time remaining
+            </div>
+
+            <div
+                class="countdown"
+                id="vincent-countdown"
+            >
+                --:--:--
+            </div>
+
+
+            <div
+                class="status"
+                id="vincent-status"
+            >
+                Enter today's work information.
+            </div>
+
+
+            <div
+                class="good-job"
+                id="vincent-good-job"
+            >
+                Good Job Vincent! 🎉
+            </div>
+
+
+            <div class="progress-container">
+
+                <div
+                    class="progress-bar"
+                    id="vincent-progress"
+                ></div>
+
+            </div>
+
+
+            <div
+                class="progress-text"
+                id="vincent-progress-text"
+            ></div>
+
+
+            <div
+                class="summary"
+                id="vincent-summary"
+            >
+                No calculation yet.
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =============================== -->
+    <!-- MICHELLE -->
+    <!-- =============================== -->
+
+    <div class="card">
+
+        <h2 class="person-title">
+            Michelle's Work Countdown
+        </h2>
+
+
+        <div class="input-group">
+            <label for="michelle-arrival">
+                Arrival time
+            </label>
+
+            <input
+                type="time"
+                id="michelle-arrival"
+            >
+        </div>
+
+
+        <div class="input-group">
+            <label for="michelle-work">
+                Work hours today
+            </label>
+
+            <input
+                type="number"
+                id="michelle-work"
+                value="8"
+                min="0"
+                step="0.25"
+            >
+        </div>
+
+
+        <div class="input-group">
+            <label for="michelle-break">
+                Lunch / break (minutes)
+            </label>
+
+            <input
+                type="number"
+                id="michelle-break"
+                value="30"
+                min="0"
+                step="1"
+            >
+        </div>
+
+
+        <button
+            class="start-button"
+            onclick="calculateWorkDay('michelle')"
+        >
+            Start / Update Countdown
+        </button>
+
+
+        <button
+            class="feierabend-button"
+            id="michelle-feierabend-button"
+            onclick="feierabend('michelle')"
+            disabled
+        >
+            Feierabend!! 🎉
+        </button>
+
+
+        <div class="result">
+
+            <div class="small-title">
+                Planned Feierabend
+            </div>
+
+            <div
+                class="leave-time"
+                id="michelle-leave"
+            >
+                --:--
+            </div>
+
+
+            <div class="small-title">
+                Time remaining
+            </div>
+
+            <div
+                class="countdown"
+                id="michelle-countdown"
+            >
+                --:--:--
+            </div>
+
+
+            <div
+                class="status"
+                id="michelle-status"
+            >
+                Enter today's work information.
+            </div>
+
+
+            <div
+                class="good-job"
+                id="michelle-good-job"
+            >
+                Good Job Michelle! 🎉
+            </div>
+
+
+            <div class="progress-container">
+
+                <div
+                    class="progress-bar"
+                    id="michelle-progress"
+                ></div>
+
+            </div>
+
+
+            <div
+                class="progress-text"
+                id="michelle-progress-text"
+            ></div>
+
+
+            <div
+                class="summary"
+                id="michelle-summary"
+            >
+                No calculation yet.
+            </div>
+
         </div>
 
     </div>
@@ -210,194 +554,1092 @@
 
 <script>
 
-let leaveDate = null;
-let arrivalDate = null;
-let countdownInterval = null;
+/*
+    Current state for each person
+*/
+
+const people = {
+
+    vincent: {
+        displayName: "Vincent",
+        arrivalDate: null,
+        leaveDate: null,
+        finished: false,
+        actualFinishDate: null
+    },
+
+    michelle: {
+        displayName: "Michelle",
+        arrivalDate: null,
+        leaveDate: null,
+        finished: false,
+        actualFinishDate: null
+    }
+
+};
 
 
-// ----------------------------------------------------
-// Calculate leaving time
-// ----------------------------------------------------
+let currentDateKey =
+    getDateKey();
 
-function calculateWorkDay() {
 
-    const arrivalValue =
-        document.getElementById("arrival").value;
+
+// =========================================
+// CALCULATE WORK DAY
+// =========================================
+
+function calculateWorkDay(person) {
+
+    const arrivalInput =
+        document.getElementById(
+            `${person}-arrival`
+        ).value;
+
 
     const workHours =
-        parseFloat(document.getElementById("workHours").value);
+        parseFloat(
+            document.getElementById(
+                `${person}-work`
+            ).value
+        );
+
 
     const breakMinutes =
-        parseFloat(document.getElementById("breakMinutes").value);
+        parseFloat(
+            document.getElementById(
+                `${person}-break`
+            ).value
+        );
 
 
-    if (!arrivalValue || isNaN(workHours) || isNaN(breakMinutes)) {
+    if (
+        !arrivalInput ||
+        isNaN(workHours) ||
+        isNaN(breakMinutes) ||
+        workHours < 0 ||
+        breakMinutes < 0
+    ) {
 
-        alert("Please fill in all fields.");
+        alert(
+            "Please fill in all fields correctly."
+        );
 
         return;
     }
 
 
-    // Get today's date
-    const now = new Date();
+    const today =
+        new Date();
+
 
     const [hours, minutes] =
-        arrivalValue.split(":").map(Number);
+        arrivalInput
+            .split(":")
+            .map(Number);
 
 
-    // Create arrival date/time
-    arrivalDate = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        hours,
-        minutes,
-        0
-    );
+    const arrivalDate =
+        new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate(),
+            hours,
+            minutes,
+            0,
+            0
+        );
 
 
-    // Convert work hours to milliseconds
     const workMilliseconds =
-        workHours * 60 * 60 * 1000;
+        workHours *
+        60 *
+        60 *
+        1000;
 
 
-    // Convert break minutes to milliseconds
     const breakMilliseconds =
-        breakMinutes * 60 * 1000;
+        breakMinutes *
+        60 *
+        1000;
 
 
-    // Leaving time =
-    // Arrival + actual working hours + break
-    leaveDate = new Date(
-        arrivalDate.getTime()
-        + workMilliseconds
-        + breakMilliseconds
-    );
+    const leaveDate =
+        new Date(
+            arrivalDate.getTime()
+            +
+            workMilliseconds
+            +
+            breakMilliseconds
+        );
 
 
-    // Display leaving time
-    document.getElementById("leaveTime").textContent =
+    people[person].arrivalDate =
+        arrivalDate;
+
+
+    people[person].leaveDate =
+        leaveDate;
+
+
+    /*
+        Starting/updating a countdown
+        means the person is working again.
+    */
+
+    people[person].finished =
+        false;
+
+
+    people[person].actualFinishDate =
+        null;
+
+
+    document.getElementById(
+        `${person}-good-job`
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        `${person}-feierabend-button`
+    ).disabled =
+        false;
+
+
+    document.getElementById(
+        `${person}-leave`
+    ).textContent =
         formatTime(leaveDate);
 
 
-    // Summary
-    document.getElementById("summary").innerHTML =
-        `
-        Arrival: <strong>${formatTime(arrivalDate)}</strong><br>
-        Work: <strong>${formatWorkHours(workHours)}</strong><br>
-        Break: <strong>${breakMinutes} min</strong><br>
-        Leave: <strong>${formatTime(leaveDate)}</strong>
-        `;
+    updateSummary(
+        person,
+        workHours,
+        breakMinutes
+    );
 
 
-    // Save values
-    saveSettings();
+    savePerson(person);
 
 
-    // Start / restart countdown
-    if (countdownInterval) {
-        clearInterval(countdownInterval);
-    }
-
-    updateCountdown();
-
-    countdownInterval =
-        setInterval(updateCountdown, 1000);
+    updateCountdown(person);
 }
 
 
-// ----------------------------------------------------
-// Countdown
-// ----------------------------------------------------
 
-function updateCountdown() {
+// =========================================
+// FEIERABEND BUTTON
+// =========================================
 
-    if (!leaveDate || !arrivalDate) {
+function feierabend(person) {
+
+    const data =
+        people[person];
+
+
+    if (
+        !data.arrivalDate ||
+        !data.leaveDate
+    ) {
+
         return;
     }
 
 
-    const now = new Date();
+    /*
+        Freeze the countdown at
+        the exact time button was pressed.
+    */
+
+    data.finished =
+        true;
+
+
+    data.actualFinishDate =
+        new Date();
+
+
+    document.getElementById(
+        `${person}-good-job`
+    ).textContent =
+        `Good Job ${data.displayName}! 🎉`;
+
+
+    document.getElementById(
+        `${person}-good-job`
+    ).style.display =
+        "block";
+
+
+    document.getElementById(
+        `${person}-feierabend-button`
+    ).disabled =
+        true;
+
+
+    /*
+        Show the final countdown/overtime
+        value at the moment Feierabend was clicked.
+    */
+
+    renderFinalTime(person);
+
+
+    savePerson(person);
+}
+
+
+
+// =========================================
+// FINAL STOPPED TIME
+// =========================================
+
+function renderFinalTime(person) {
+
+    const data =
+        people[person];
+
+
+    if (
+        !data.actualFinishDate ||
+        !data.leaveDate
+    ) {
+        return;
+    }
+
 
     const difference =
-        leaveDate.getTime() - now.getTime();
+        data.leaveDate.getTime()
+        -
+        data.actualFinishDate.getTime();
 
 
-    // Workday hasn't started yet
-    if (now < arrivalDate) {
+    /*
+        Finished before planned leaving time.
+    */
 
-        document.getElementById("countdown").textContent =
-            formatDuration(arrivalDate - now);
-
-        document.getElementById("status").textContent =
-            "Until your workday starts";
-
-        document.getElementById("progressBar").style.width =
-            "0%";
-
-        document.getElementById("progressText").textContent =
-            "0%";
-
-        return;
-    }
-
-
-    // Still working
     if (difference > 0) {
 
-        document.getElementById("countdown").textContent =
+        document.getElementById(
+            `${person}-countdown`
+        ).textContent =
             formatDuration(difference);
 
-        document.getElementById("status").textContent =
-            "until you can go home";
 
+        document.getElementById(
+            `${person}-status`
+        ).textContent =
+            `Feierabend at ${formatTime(data.actualFinishDate)}`;
 
-        // Progress percentage
-        const totalDay =
-            leaveDate.getTime() - arrivalDate.getTime();
-
-        const worked =
-            now.getTime() - arrivalDate.getTime();
-
-        let percentage =
-            (worked / totalDay) * 100;
-
-        percentage =
-            Math.max(0, Math.min(100, percentage));
-
-
-        document.getElementById("progressBar").style.width =
-            percentage + "%";
-
-        document.getElementById("progressText").textContent =
-            percentage.toFixed(1) + "% of the day completed";
     }
 
-    // Finished / overtime
+    /*
+        Exactly on time.
+    */
+
+    else if (difference === 0) {
+
+        document.getElementById(
+            `${person}-countdown`
+        ).textContent =
+            "00:00:00";
+
+
+        document.getElementById(
+            `${person}-status`
+        ).textContent =
+            `Feierabend at ${formatTime(data.actualFinishDate)}`;
+
+    }
+
+    /*
+        Finished after planned leaving time.
+    */
+
     else {
 
         const overtime =
             Math.abs(difference);
 
-        document.getElementById("countdown").textContent =
-            "+" + formatDuration(overtime);
 
-        document.getElementById("status").textContent =
-            "You're done! Overtime";
+        document.getElementById(
+            `${person}-countdown`
+        ).textContent =
+            "-"
+            +
+            formatDuration(overtime);
 
-        document.getElementById("progressBar").style.width =
-            "100%";
 
-        document.getElementById("progressText").textContent =
-            "Workday completed 🎉";
+        document.getElementById(
+            `${person}-status`
+        ).textContent =
+            `Feierabend at ${formatTime(data.actualFinishDate)} • Overtime`;
+
     }
+
+
+    document.getElementById(
+        `${person}-progress`
+    ).style.width =
+        "100%";
+
+
+    document.getElementById(
+        `${person}-progress-text`
+    ).textContent =
+        "Workday finished";
+
 }
 
 
-// ----------------------------------------------------
-// Format HH:MM
-// ----------------------------------------------------
+
+// =========================================
+// LIVE COUNTDOWN
+// =========================================
+
+function updateCountdown(person) {
+
+    const data =
+        people[person];
+
+
+    if (
+        !data.arrivalDate ||
+        !data.leaveDate
+    ) {
+
+        return;
+    }
+
+
+    /*
+        If Feierabend has already been clicked,
+        do not update anymore.
+    */
+
+    if (data.finished) {
+
+        renderFinalTime(person);
+
+        return;
+    }
+
+
+    const now =
+        new Date();
+
+
+    /*
+        BEFORE ARRIVAL
+    */
+
+    if (
+        now <
+        data.arrivalDate
+    ) {
+
+        const untilStart =
+            data.arrivalDate.getTime()
+            -
+            now.getTime();
+
+
+        document.getElementById(
+            `${person}-countdown`
+        ).textContent =
+            formatDuration(untilStart);
+
+
+        document.getElementById(
+            `${person}-status`
+        ).textContent =
+            "until work starts";
+
+
+        document.getElementById(
+            `${person}-progress`
+        ).style.width =
+            "0%";
+
+
+        document.getElementById(
+            `${person}-progress-text`
+        ).textContent =
+            "0% completed";
+
+
+        return;
+    }
+
+
+    const remaining =
+        data.leaveDate.getTime()
+        -
+        now.getTime();
+
+
+    /*
+        NORMAL COUNTDOWN
+    */
+
+    if (remaining >= 0) {
+
+        document.getElementById(
+            `${person}-countdown`
+        ).textContent =
+            formatDuration(remaining);
+
+
+        document.getElementById(
+            `${person}-status`
+        ).textContent =
+            "until planned Feierabend";
+
+
+        const totalTime =
+            data.leaveDate.getTime()
+            -
+            data.arrivalDate.getTime();
+
+
+        const elapsed =
+            now.getTime()
+            -
+            data.arrivalDate.getTime();
+
+
+        let percentage =
+            (
+                elapsed /
+                totalTime
+            ) * 100;
+
+
+        percentage =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    percentage
+                )
+            );
+
+
+        document.getElementById(
+            `${person}-progress`
+        ).style.width =
+            `${percentage}%`;
+
+
+        document.getElementById(
+            `${person}-progress-text`
+        ).textContent =
+            `${percentage.toFixed(1)}% completed`;
+
+    }
+
+    /*
+        OVERTIME
+
+        Important:
+        The timer does NOT stop at zero.
+
+        Example:
+        -00:00:01
+        -00:00:02
+        -00:00:03
+        ...
+    */
+
+    else {
+
+        const overtime =
+            Math.abs(remaining);
+
+
+        document.getElementById(
+            `${person}-countdown`
+        ).textContent =
+            "-"
+            +
+            formatDuration(overtime);
+
+
+        document.getElementById(
+            `${person}-status`
+        ).textContent =
+            "OVERTIME • click Feierabend when you leave";
+
+
+        document.getElementById(
+            `${person}-progress`
+        ).style.width =
+            "100%";
+
+
+        document.getElementById(
+            `${person}-progress-text`
+        ).textContent =
+            "Planned workday completed";
+
+    }
+
+}
+
+
+
+// =========================================
+// UPDATE BOTH
+// =========================================
+
+function updateAllCountdowns() {
+
+    const newDateKey =
+        getDateKey();
+
+
+    /*
+        Midnight/new-day detection
+    */
+
+    if (
+        newDateKey !==
+        currentDateKey
+    ) {
+
+        currentDateKey =
+            newDateKey;
+
+
+        resetForNewDay();
+
+
+        return;
+    }
+
+
+    updateCountdown(
+        "vincent"
+    );
+
+
+    updateCountdown(
+        "michelle"
+    );
+
+}
+
+
+
+// =========================================
+// SUMMARY
+// =========================================
+
+function updateSummary(
+    person,
+    workHours,
+    breakMinutes
+) {
+
+    const data =
+        people[person];
+
+
+    let extra =
+        "";
+
+
+    if (
+        data.finished &&
+        data.actualFinishDate
+    ) {
+
+        extra = `
+
+            <br>
+
+            Actual Feierabend:
+            <strong>
+                ${formatTime(data.actualFinishDate)}
+            </strong>
+
+        `;
+
+    }
+
+
+    document.getElementById(
+        `${person}-summary`
+    ).innerHTML = `
+
+        Arrival:
+        <strong>
+            ${formatTime(data.arrivalDate)}
+        </strong>
+
+        <br>
+
+        Work:
+        <strong>
+            ${formatWorkHours(workHours)}
+        </strong>
+
+        <br>
+
+        Break:
+        <strong>
+            ${breakMinutes} min
+        </strong>
+
+        <br>
+
+        Planned Feierabend:
+        <strong>
+            ${formatTime(data.leaveDate)}
+        </strong>
+
+        ${extra}
+
+    `;
+
+}
+
+
+
+// =========================================
+// SAVE
+// =========================================
+
+function savePerson(person) {
+
+    const data =
+        people[person];
+
+
+    const savedData = {
+
+        date:
+            getDateKey(),
+
+        arrival:
+            document.getElementById(
+                `${person}-arrival`
+            ).value,
+
+        workHours:
+            document.getElementById(
+                `${person}-work`
+            ).value,
+
+        breakMinutes:
+            document.getElementById(
+                `${person}-break`
+            ).value,
+
+        finished:
+            data.finished,
+
+        actualFinish:
+            data.actualFinishDate
+                ?
+                data.actualFinishDate.toISOString()
+                :
+                null
+
+    };
+
+
+    localStorage.setItem(
+
+        `workCountdown-${person}`,
+
+        JSON.stringify(savedData)
+
+    );
+
+}
+
+
+
+// =========================================
+// LOAD
+// =========================================
+
+function loadPerson(person) {
+
+    const saved =
+        localStorage.getItem(
+            `workCountdown-${person}`
+        );
+
+
+    if (!saved) {
+
+        setDefaultValues(person);
+
+        return;
+    }
+
+
+    let savedData;
+
+
+    try {
+
+        savedData =
+            JSON.parse(saved);
+
+    }
+
+    catch {
+
+        localStorage.removeItem(
+            `workCountdown-${person}`
+        );
+
+
+        setDefaultValues(person);
+
+        return;
+    }
+
+
+    /*
+        Yesterday's data?
+        Throw it away.
+    */
+
+    if (
+        savedData.date !==
+        getDateKey()
+    ) {
+
+        localStorage.removeItem(
+            `workCountdown-${person}`
+        );
+
+
+        setDefaultValues(person);
+
+        return;
+    }
+
+
+    document.getElementById(
+        `${person}-arrival`
+    ).value =
+        savedData.arrival;
+
+
+    document.getElementById(
+        `${person}-work`
+    ).value =
+        savedData.workHours;
+
+
+    document.getElementById(
+        `${person}-break`
+    ).value =
+        savedData.breakMinutes;
+
+
+    /*
+        Rebuild arrival and planned
+        leaving times.
+    */
+
+    const today =
+        new Date();
+
+
+    const [hours, minutes] =
+        savedData.arrival
+            .split(":")
+            .map(Number);
+
+
+    people[person].arrivalDate =
+        new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate(),
+            hours,
+            minutes,
+            0,
+            0
+        );
+
+
+    const workHours =
+        parseFloat(
+            savedData.workHours
+        );
+
+
+    const breakMinutes =
+        parseFloat(
+            savedData.breakMinutes
+        );
+
+
+    people[person].leaveDate =
+        new Date(
+
+            people[person]
+                .arrivalDate
+                .getTime()
+
+            +
+
+            workHours *
+            60 *
+            60 *
+            1000
+
+            +
+
+            breakMinutes *
+            60 *
+            1000
+
+        );
+
+
+    people[person].finished =
+        savedData.finished === true;
+
+
+    people[person].actualFinishDate =
+        savedData.actualFinish
+            ?
+            new Date(
+                savedData.actualFinish
+            )
+            :
+            null;
+
+
+    document.getElementById(
+        `${person}-leave`
+    ).textContent =
+        formatTime(
+            people[person].leaveDate
+        );
+
+
+    /*
+        Feierabend already clicked earlier?
+    */
+
+    if (
+        people[person].finished
+    ) {
+
+        document.getElementById(
+            `${person}-good-job`
+        ).textContent =
+            `Good Job ${people[person].displayName}! 🎉`;
+
+
+        document.getElementById(
+            `${person}-good-job`
+        ).style.display =
+            "block";
+
+
+        document.getElementById(
+            `${person}-feierabend-button`
+        ).disabled =
+            true;
+
+
+        renderFinalTime(person);
+
+    }
+
+    else {
+
+        document.getElementById(
+            `${person}-feierabend-button`
+        ).disabled =
+            false;
+
+
+        updateCountdown(person);
+
+    }
+
+
+    updateSummary(
+        person,
+        workHours,
+        breakMinutes
+    );
+
+}
+
+
+
+// =========================================
+// NEW DAY
+// =========================================
+
+function resetForNewDay() {
+
+    localStorage.removeItem(
+        "workCountdown-vincent"
+    );
+
+
+    localStorage.removeItem(
+        "workCountdown-michelle"
+    );
+
+
+    resetPerson(
+        "vincent"
+    );
+
+
+    resetPerson(
+        "michelle"
+    );
+
+
+    displayDate();
+
+}
+
+
+
+// =========================================
+// RESET PERSON
+// =========================================
+
+function resetPerson(person) {
+
+    people[person].arrivalDate =
+        null;
+
+
+    people[person].leaveDate =
+        null;
+
+
+    people[person].finished =
+        false;
+
+
+    people[person].actualFinishDate =
+        null;
+
+
+    setDefaultValues(person);
+
+
+    document.getElementById(
+        `${person}-leave`
+    ).textContent =
+        "--:--";
+
+
+    document.getElementById(
+        `${person}-countdown`
+    ).textContent =
+        "--:--:--";
+
+
+    document.getElementById(
+        `${person}-status`
+    ).textContent =
+        "Enter today's work information.";
+
+
+    document.getElementById(
+        `${person}-good-job`
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        `${person}-summary`
+    ).textContent =
+        "No calculation yet.";
+
+
+    document.getElementById(
+        `${person}-progress`
+    ).style.width =
+        "0%";
+
+
+    document.getElementById(
+        `${person}-progress-text`
+    ).textContent =
+        "";
+
+
+    document.getElementById(
+        `${person}-feierabend-button`
+    ).disabled =
+        true;
+
+}
+
+
+
+// =========================================
+// DEFAULT VALUES
+// =========================================
+
+function setDefaultValues(person) {
+
+    const now =
+        new Date();
+
+
+    const hours =
+        String(
+            now.getHours()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const minutes =
+        String(
+            now.getMinutes()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    document.getElementById(
+        `${person}-arrival`
+    ).value =
+        `${hours}:${minutes}`;
+
+
+    document.getElementById(
+        `${person}-work`
+    ).value =
+        "8";
+
+
+    document.getElementById(
+        `${person}-break`
+    ).value =
+        "30";
+
+}
+
+
+
+// =========================================
+// FORMATTING
+// =========================================
 
 function formatTime(date) {
 
@@ -409,135 +1651,206 @@ function formatTime(date) {
             hour12: false
         }
     );
+
 }
 
-
-// ----------------------------------------------------
-// Format countdown
-// ----------------------------------------------------
 
 function formatDuration(milliseconds) {
 
-    const totalSeconds =
-        Math.floor(milliseconds / 1000);
+    let totalSeconds =
+        Math.floor(
+            Math.abs(milliseconds) /
+            1000
+        );
+
 
     const hours =
-        Math.floor(totalSeconds / 3600);
+        Math.floor(
+            totalSeconds /
+            3600
+        );
+
 
     const minutes =
-        Math.floor((totalSeconds % 3600) / 60);
+        Math.floor(
+            (
+                totalSeconds %
+                3600
+            )
+            /
+            60
+        );
+
 
     const seconds =
-        totalSeconds % 60;
+        totalSeconds %
+        60;
 
 
     return (
-        String(hours).padStart(2, "0")
-        + ":"
-        + String(minutes).padStart(2, "0")
-        + ":"
-        + String(seconds).padStart(2, "0")
+
+        String(hours)
+            .padStart(
+                2,
+                "0"
+            )
+
+        +
+
+        ":"
+
+        +
+
+        String(minutes)
+            .padStart(
+                2,
+                "0"
+            )
+
+        +
+
+        ":"
+
+        +
+
+        String(seconds)
+            .padStart(
+                2,
+                "0"
+            )
+
     );
+
 }
 
 
-// ----------------------------------------------------
-// Format decimal work hours
-// Example 7.5 -> 7h 30m
-// ----------------------------------------------------
+function formatWorkHours(
+    decimalHours
+) {
 
-function formatWorkHours(hours) {
+    const hours =
+        Math.floor(
+            decimalHours
+        );
 
-    const wholeHours =
-        Math.floor(hours);
 
     const minutes =
-        Math.round((hours - wholeHours) * 60);
-
-    return `${wholeHours}h ${minutes}m`;
-}
-
-
-// ----------------------------------------------------
-// Save inputs
-// ----------------------------------------------------
-
-function saveSettings() {
-
-    const data = {
-
-        date:
-            new Date().toDateString(),
-
-        arrival:
-            document.getElementById("arrival").value,
-
-        workHours:
-            document.getElementById("workHours").value,
-
-        breakMinutes:
-            document.getElementById("breakMinutes").value
-    };
+        Math.round(
+            (
+                decimalHours -
+                hours
+            )
+            *
+            60
+        );
 
 
-    localStorage.setItem(
-        "workCountdown",
-        JSON.stringify(data)
-    );
-}
+    if (
+        minutes === 0
+    ) {
 
+        return `${hours}h`;
 
-// ----------------------------------------------------
-// Load saved inputs
-// ----------------------------------------------------
-
-function loadSettings() {
-
-    const saved =
-        localStorage.getItem("workCountdown");
-
-
-    if (saved) {
-
-        const data =
-            JSON.parse(saved);
-
-
-        // Only automatically restore if it was saved today
-        if (data.date === new Date().toDateString()) {
-
-            document.getElementById("arrival").value =
-                data.arrival;
-
-            document.getElementById("workHours").value =
-                data.workHours;
-
-            document.getElementById("breakMinutes").value =
-                data.breakMinutes;
-
-            calculateWorkDay();
-
-            return;
-        }
     }
 
 
-    // Otherwise use current time as default arrival
-    const now = new Date();
+    return `${hours}h ${minutes}m`;
 
-    const hours =
-        String(now.getHours()).padStart(2, "0");
-
-    const minutes =
-        String(now.getMinutes()).padStart(2, "0");
-
-    document.getElementById("arrival").value =
-        `${hours}:${minutes}`;
 }
 
 
-// Run when page loads
-loadSettings();
+
+// =========================================
+// DATE
+// =========================================
+
+function getDateKey() {
+
+    const now =
+        new Date();
+
+
+    const year =
+        now.getFullYear();
+
+
+    const month =
+        String(
+            now.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const day =
+        String(
+            now.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    return (
+        `${year}-${month}-${day}`
+    );
+
+}
+
+
+function displayDate() {
+
+    document.getElementById(
+        "todayDate"
+    ).textContent =
+        new Date()
+            .toLocaleDateString(
+                undefined,
+                {
+                    weekday:
+                        "long",
+
+                    day:
+                        "numeric",
+
+                    month:
+                        "long",
+
+                    year:
+                        "numeric"
+                }
+            );
+
+}
+
+
+
+// =========================================
+// START PAGE
+// =========================================
+
+displayDate();
+
+
+loadPerson(
+    "vincent"
+);
+
+
+loadPerson(
+    "michelle"
+);
+
+
+/*
+    Both timers update every second.
+*/
+
+setInterval(
+    updateAllCountdowns,
+    1000
+);
 
 </script>
 
