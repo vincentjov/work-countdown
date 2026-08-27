@@ -230,6 +230,7 @@
   <h1>Work Countdown</h1>
   <div class="date" id="todayDate"></div>
   <div class="sync-status" id="syncStatus">Connecting to Firebase…</div>
+  <div class="sync-status" id="appVersion">Version 2.1 • Michelle break included in 8h</div>
   <div class="error" id="errorBox"></div>
 
   <div class="dashboard">
@@ -569,7 +570,8 @@
     document.getElementById(`${person}-summary`).innerHTML = `
       Arrival: <strong>${data.arrival}</strong><br>
       Work: <strong>${formatWorkHours(Number(data.workHours))}</strong><br>
-      Break: <strong>${Number(data.breakMinutes)} min${person === "michelle" ? " (included)" : ""}</strong><br>
+      Break: <strong>${Number(data.breakMinutes)} min${person === "michelle" ? " (already included in total time)" : ""}</strong><br>
+      ${person === "michelle" ? '<span style="font-size:12px;color:#777">Michelle: break does not extend Feierabend.</span><br>' : ''}
       Planned Feierabend: <strong>${formatClock(new Date(data.plannedFinishEpoch))}</strong>
       ${extra}
     `;
@@ -650,6 +652,21 @@
     }
   }
 
+  function calculatePlannedFinish(person, arrivalDate, workHours, breakMinutes) {
+    const workMs = workHours * 60 * 60 * 1000;
+    const breakMs = breakMinutes * 60 * 1000;
+
+    // Vincent: paid/working hours + break on top.
+    // Example: 09:00 + 8h + 30m = 17:30.
+    if (person === "vincent") {
+      return new Date(arrivalDate.getTime() + workMs + breakMs);
+    }
+
+    // Michelle: the entered hours already include her lunch/break.
+    // Example: 09:00 + 8h = 17:00, regardless of a 30-minute break.
+    return new Date(arrivalDate.getTime() + workMs);
+  }
+
   async function startOrUpdate(person) {
     if (!firebaseReady) {
       showError("Firebase is still connecting. Please try again in a moment.");
@@ -675,11 +692,7 @@
 
     const arrivalDate = dateFromBerlinDayAndTime(currentDayKey, arrival);
     const plannedFinish =
-      new Date(
-        arrivalDate.getTime() +
-        workHours * 60 * 60 * 1000 +
-        (person === "vincent" ? breakMinutes * 60 * 1000 : 0)
-      );
+      calculatePlannedFinish(person, arrivalDate, workHours, breakMinutes);
 
     const payload = {
       arrival,
