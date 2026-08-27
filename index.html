@@ -1,1857 +1,829 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Work Countdown</title>
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    >
+  <style>
+    * { box-sizing: border-box; }
 
-    <title>Work Countdown</title>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 28px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: #f3f4f6;
+      color: #1d1d1f;
+    }
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+    .page {
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+    }
 
-        body {
-            margin: 0;
-            min-height: 100vh;
-            padding: 30px;
+    h1 {
+      text-align: center;
+      margin: 0 0 6px;
+      font-size: 28px;
+    }
 
-            font-family:
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                Arial,
-                sans-serif;
+    .date {
+      text-align: center;
+      color: #777;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
 
-            background: #f2f3f5;
-            color: #1d1d1f;
-        }
+    .sync-status {
+      text-align: center;
+      font-size: 13px;
+      margin-bottom: 24px;
+      color: #666;
+    }
 
-        h1 {
-            text-align: center;
-            margin-top: 0;
-            margin-bottom: 8px;
-            font-size: 28px;
-        }
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+    }
 
-        .date {
-            text-align: center;
-            color: #777;
-            font-size: 13px;
-            margin-bottom: 28px;
-        }
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 26px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.08);
+      min-width: 0;
+    }
 
-        .dashboard {
-            width: 100%;
-            max-width: 1100px;
-            margin: 0 auto;
+    .person-title {
+      text-align: center;
+      margin: 0 0 22px;
+      font-size: 22px;
+    }
 
-            display: grid;
-            grid-template-columns:
-                repeat(2, minmax(0, 1fr));
+    .input-group { margin-bottom: 15px; }
 
-            gap: 24px;
-        }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      font-weight: 600;
+    }
 
-        .card {
-            background: white;
-            padding: 28px;
-            border-radius: 20px;
+    input {
+      width: 100%;
+      min-height: 46px;
+      padding: 11px 12px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background: #fff;
+      font-size: 16px;
+    }
 
-            box-shadow:
-                0 8px 30px rgba(0, 0, 0, 0.08);
+    button {
+      width: 100%;
+      min-height: 48px;
+      border: 0;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 650;
+      cursor: pointer;
+    }
 
-            min-width: 0;
-        }
+    button:active { transform: scale(.99); }
 
-        .person-title {
-            text-align: center;
-            font-size: 23px;
-            font-weight: 700;
-            margin-top: 0;
-            margin-bottom: 25px;
-        }
+    .start-button {
+      margin-top: 4px;
+      background: #1d1d1f;
+      color: #fff;
+    }
 
-        .input-group {
-            margin-bottom: 16px;
-        }
+    .feierabend-button {
+      margin-top: 10px;
+      background: #ececec;
+      color: #1d1d1f;
+    }
 
-        label {
-            display: block;
-            margin-bottom: 7px;
-            font-size: 14px;
-            font-weight: 600;
-        }
+    .feierabend-button:disabled {
+      opacity: .45;
+      cursor: default;
+    }
 
-        input {
-            width: 100%;
-            padding: 12px 13px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            font-size: 16px;
-            background: white;
-            min-height: 46px;
-        }
+    .result {
+      margin-top: 24px;
+      padding-top: 22px;
+      border-top: 1px solid #e7e7e7;
+      text-align: center;
+    }
 
-        button {
-            width: 100%;
-            padding: 14px;
-            margin-top: 5px;
+    .small-title {
+      color: #777;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
 
-            border: none;
-            border-radius: 10px;
+    .leave-time {
+      font-size: 33px;
+      font-weight: 750;
+      margin-bottom: 21px;
+    }
 
-            font-size: 16px;
-            font-weight: 600;
+    .countdown {
+      font-size: clamp(31px, 5vw, 46px);
+      font-weight: 760;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
 
-            cursor: pointer;
-        }
+    .status {
+      min-height: 20px;
+      margin-top: 7px;
+      color: #777;
+      font-size: 14px;
+    }
 
-        .start-button {
-            background: #1d1d1f;
-            color: white;
-        }
+    .good-job {
+      display: none;
+      margin-top: 14px;
+      font-size: 21px;
+      font-weight: 750;
+    }
 
-        .start-button:active,
-        .feierabend-button:active {
-            transform: scale(0.99);
-        }
+    .progress-container {
+      height: 9px;
+      margin-top: 21px;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #e5e5e5;
+    }
 
-        .feierabend-button {
-            background: #ececec;
-            color: #1d1d1f;
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: #1d1d1f;
+      transition: width .5s linear;
+    }
 
-            margin-top: 10px;
-        }
+    .progress-text {
+      min-height: 17px;
+      margin-top: 7px;
+      color: #777;
+      font-size: 12px;
+    }
 
-        .feierabend-button:disabled {
-            opacity: 0.45;
-            cursor: default;
-        }
+    .summary {
+      margin-top: 17px;
+      padding: 13px;
+      border-radius: 12px;
+      background: #f5f5f7;
+      font-size: 14px;
+      line-height: 1.6;
+    }
 
-        .result {
-            text-align: center;
-            margin-top: 27px;
-            border-top: 1px solid #e5e5e5;
-            padding-top: 24px;
-        }
+    .error {
+      max-width: 760px;
+      margin: 0 auto 20px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #fff4f4;
+      display: none;
+      font-size: 14px;
+      line-height: 1.45;
+    }
 
-        .small-title {
-            font-size: 13px;
-            color: #777;
-            margin-bottom: 5px;
-        }
+    @media (max-width: 700px) {
+      body {
+        padding:
+          max(16px, env(safe-area-inset-top))
+          14px
+          max(20px, env(safe-area-inset-bottom));
+      }
 
-        .leave-time {
-            font-size: 34px;
-            font-weight: 700;
-            margin-bottom: 22px;
-        }
+      h1 { font-size: 24px; }
 
-        .countdown {
-            font-size: clamp(30px, 5vw, 46px);
-            font-weight: 750;
-            letter-spacing: 1px;
-            white-space: nowrap;
-        }
+      .dashboard {
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
 
-        .status {
-            margin-top: 7px;
-            color: #777;
-            font-size: 14px;
-        }
+      .card {
+        padding: 21px 18px;
+        border-radius: 18px;
+      }
 
-        .good-job {
-            margin-top: 15px;
-            font-size: 21px;
-            font-weight: 700;
-            display: none;
-        }
+      .person-title { font-size: 21px; }
+      .leave-time { font-size: 31px; }
+      .countdown { font-size: 37px; }
+    }
 
-        .progress-container {
-            width: 100%;
-            height: 9px;
-
-            background: #e4e4e4;
-            border-radius: 20px;
-            overflow: hidden;
-            margin-top: 22px;
-        }
-
-        .progress-bar {
-            width: 0%;
-            height: 100%;
-            background: #1d1d1f;
-            transition: width 1s linear;
-        }
-
-        .progress-text {
-            margin-top: 7px;
-            font-size: 12px;
-            color: #777;
-        }
-
-        .summary {
-            margin-top: 20px;
-            padding: 14px;
-            border-radius: 12px;
-            background: #f5f5f7;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        /*
-            iPhone / smaller screens
-        */
-
-        @media (max-width: 700px) {
-
-            body {
-                padding:
-                    max(16px, env(safe-area-inset-top))
-                    14px
-                    max(20px, env(safe-area-inset-bottom));
-            }
-
-            h1 {
-                font-size: 24px;
-            }
-
-            .dashboard {
-                grid-template-columns: 1fr;
-                gap: 18px;
-            }
-
-            .card {
-                padding: 22px 18px;
-                border-radius: 18px;
-            }
-
-            .person-title {
-                font-size: 21px;
-            }
-
-            .leave-time {
-                font-size: 31px;
-            }
-
-            .countdown {
-                font-size: 38px;
-            }
-        }
-
-        @media (max-width: 380px) {
-
-            .countdown {
-                font-size: 32px;
-            }
-
-            .card {
-                padding: 20px 15px;
-            }
-        }
-    </style>
+    @media (max-width: 380px) {
+      .card { padding: 19px 15px; }
+      .countdown { font-size: 31px; }
+    }
+  </style>
 </head>
 
-
 <body>
+<div class="page">
+  <h1>Work Countdown</h1>
+  <div class="date" id="todayDate"></div>
+  <div class="sync-status" id="syncStatus">Connecting to Firebase…</div>
+  <div class="error" id="errorBox"></div>
 
-<h1>Work Countdown</h1>
+  <div class="dashboard">
 
-<div class="date" id="todayDate"></div>
-
-
-<div class="dashboard">
-
-    <!-- =============================== -->
-    <!-- VINCENT -->
-    <!-- =============================== -->
-
+    <!-- Vincent -->
     <div class="card">
+      <h2 class="person-title">Vincent's Work Countdown</h2>
 
-        <h2 class="person-title">
-            Vincent's Work Countdown
-        </h2>
+      <div class="input-group">
+        <label for="vincent-arrival">Arrival time</label>
+        <input type="time" id="vincent-arrival">
+      </div>
 
-        <div class="input-group">
-            <label for="vincent-arrival">
-                Arrival time
-            </label>
+      <div class="input-group">
+        <label for="vincent-work">Work hours today</label>
+        <input type="number" id="vincent-work" min="0" step="0.25" value="8">
+      </div>
 
-            <input
-                type="time"
-                id="vincent-arrival"
-            >
+      <div class="input-group">
+        <label for="vincent-break">Lunch / break (minutes)</label>
+        <input type="number" id="vincent-break" min="0" step="1" value="30">
+      </div>
+
+      <button class="start-button" onclick="startOrUpdate('vincent')">
+        Start / Update Countdown
+      </button>
+
+      <button
+        class="feierabend-button"
+        id="vincent-feierabend-button"
+        onclick="feierabend('vincent')"
+        disabled
+      >
+        Feierabend!! 🎉
+      </button>
+
+      <div class="result">
+        <div class="small-title">Planned Feierabend</div>
+        <div class="leave-time" id="vincent-leave">--:--</div>
+
+        <div class="small-title">Time remaining</div>
+        <div class="countdown" id="vincent-countdown">--:--:--</div>
+
+        <div class="status" id="vincent-status">
+          Enter today's work information.
         </div>
 
-
-        <div class="input-group">
-            <label for="vincent-work">
-                Work hours today
-            </label>
-
-            <input
-                type="number"
-                id="vincent-work"
-                value="8"
-                min="0"
-                step="0.25"
-            >
+        <div class="good-job" id="vincent-good-job">
+          Good Job Vincent! 🎉
         </div>
 
-
-        <div class="input-group">
-            <label for="vincent-break">
-                Lunch / break (minutes)
-            </label>
-
-            <input
-                type="number"
-                id="vincent-break"
-                value="30"
-                min="0"
-                step="1"
-            >
+        <div class="progress-container">
+          <div class="progress-bar" id="vincent-progress"></div>
         </div>
 
+        <div class="progress-text" id="vincent-progress-text"></div>
 
-        <button
-            class="start-button"
-            onclick="calculateWorkDay('vincent')"
-        >
-            Start / Update Countdown
-        </button>
-
-
-        <button
-            class="feierabend-button"
-            id="vincent-feierabend-button"
-            onclick="feierabend('vincent')"
-            disabled
-        >
-            Feierabend!! 🎉
-        </button>
-
-
-        <div class="result">
-
-            <div class="small-title">
-                Planned Feierabend
-            </div>
-
-            <div
-                class="leave-time"
-                id="vincent-leave"
-            >
-                --:--
-            </div>
-
-
-            <div class="small-title">
-                Time remaining
-            </div>
-
-            <div
-                class="countdown"
-                id="vincent-countdown"
-            >
-                --:--:--
-            </div>
-
-
-            <div
-                class="status"
-                id="vincent-status"
-            >
-                Enter today's work information.
-            </div>
-
-
-            <div
-                class="good-job"
-                id="vincent-good-job"
-            >
-                Good Job Vincent! 🎉
-            </div>
-
-
-            <div class="progress-container">
-
-                <div
-                    class="progress-bar"
-                    id="vincent-progress"
-                ></div>
-
-            </div>
-
-
-            <div
-                class="progress-text"
-                id="vincent-progress-text"
-            ></div>
-
-
-            <div
-                class="summary"
-                id="vincent-summary"
-            >
-                No calculation yet.
-            </div>
-
+        <div class="summary" id="vincent-summary">
+          No calculation yet.
         </div>
-
+      </div>
     </div>
 
-
-
-    <!-- =============================== -->
-    <!-- MICHELLE -->
-    <!-- =============================== -->
-
+    <!-- Michelle -->
     <div class="card">
+      <h2 class="person-title">Michelle's Work Countdown</h2>
 
-        <h2 class="person-title">
-            Michelle's Work Countdown
-        </h2>
+      <div class="input-group">
+        <label for="michelle-arrival">Arrival time</label>
+        <input type="time" id="michelle-arrival">
+      </div>
 
+      <div class="input-group">
+        <label for="michelle-work">Work hours today</label>
+        <input type="number" id="michelle-work" min="0" step="0.25" value="8">
+      </div>
 
-        <div class="input-group">
-            <label for="michelle-arrival">
-                Arrival time
-            </label>
+      <div class="input-group">
+        <label for="michelle-break">Lunch / break (minutes)</label>
+        <input type="number" id="michelle-break" min="0" step="1" value="30">
+      </div>
 
-            <input
-                type="time"
-                id="michelle-arrival"
-            >
+      <button class="start-button" onclick="startOrUpdate('michelle')">
+        Start / Update Countdown
+      </button>
+
+      <button
+        class="feierabend-button"
+        id="michelle-feierabend-button"
+        onclick="feierabend('michelle')"
+        disabled
+      >
+        Feierabend!! 🎉
+      </button>
+
+      <div class="result">
+        <div class="small-title">Planned Feierabend</div>
+        <div class="leave-time" id="michelle-leave">--:--</div>
+
+        <div class="small-title">Time remaining</div>
+        <div class="countdown" id="michelle-countdown">--:--:--</div>
+
+        <div class="status" id="michelle-status">
+          Enter today's work information.
         </div>
 
-
-        <div class="input-group">
-            <label for="michelle-work">
-                Work hours today
-            </label>
-
-            <input
-                type="number"
-                id="michelle-work"
-                value="8"
-                min="0"
-                step="0.25"
-            >
+        <div class="good-job" id="michelle-good-job">
+          Good Job Michelle! 🎉
         </div>
 
-
-        <div class="input-group">
-            <label for="michelle-break">
-                Lunch / break (minutes)
-            </label>
-
-            <input
-                type="number"
-                id="michelle-break"
-                value="30"
-                min="0"
-                step="1"
-            >
+        <div class="progress-container">
+          <div class="progress-bar" id="michelle-progress"></div>
         </div>
 
+        <div class="progress-text" id="michelle-progress-text"></div>
 
-        <button
-            class="start-button"
-            onclick="calculateWorkDay('michelle')"
-        >
-            Start / Update Countdown
-        </button>
-
-
-        <button
-            class="feierabend-button"
-            id="michelle-feierabend-button"
-            onclick="feierabend('michelle')"
-            disabled
-        >
-            Feierabend!! 🎉
-        </button>
-
-
-        <div class="result">
-
-            <div class="small-title">
-                Planned Feierabend
-            </div>
-
-            <div
-                class="leave-time"
-                id="michelle-leave"
-            >
-                --:--
-            </div>
-
-
-            <div class="small-title">
-                Time remaining
-            </div>
-
-            <div
-                class="countdown"
-                id="michelle-countdown"
-            >
-                --:--:--
-            </div>
-
-
-            <div
-                class="status"
-                id="michelle-status"
-            >
-                Enter today's work information.
-            </div>
-
-
-            <div
-                class="good-job"
-                id="michelle-good-job"
-            >
-                Good Job Michelle! 🎉
-            </div>
-
-
-            <div class="progress-container">
-
-                <div
-                    class="progress-bar"
-                    id="michelle-progress"
-                ></div>
-
-            </div>
-
-
-            <div
-                class="progress-text"
-                id="michelle-progress-text"
-            ></div>
-
-
-            <div
-                class="summary"
-                id="michelle-summary"
-            >
-                No calculation yet.
-            </div>
-
+        <div class="summary" id="michelle-summary">
+          No calculation yet.
         </div>
-
+      </div>
     </div>
 
+  </div>
 </div>
 
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+  import {
+    getAuth,
+    signInAnonymously,
+    onAuthStateChanged,
+    setPersistence,
+    browserLocalPersistence
+  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
-<script>
+  import {
+    getFirestore,
+    doc,
+    setDoc,
+    onSnapshot
+  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
-/*
-    Current state for each person
-*/
+  const firebaseConfig = {
+    apiKey: "AIzaSyB9F6x2uuKoVsBaZmmtj0JPq3ZMQtCIDr4",
+    authDomain: "work-coundown.firebaseapp.com",
+    projectId: "work-coundown",
+    storageBucket: "work-coundown.firebasestorage.app",
+    messagingSenderId: "241683590561",
+    appId: "1:241683590561:web:15d746ae913f92f10e6fe0"
+  };
 
-const people = {
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-    vincent: {
-        displayName: "Vincent",
-        arrivalDate: null,
-        leaveDate: null,
-        finished: false,
-        actualFinishDate: null
-    },
+  const DISPLAY_NAMES = {
+    vincent: "Vincent",
+    michelle: "Michelle"
+  };
 
-    michelle: {
-        displayName: "Michelle",
-        arrivalDate: null,
-        leaveDate: null,
-        finished: false,
-        actualFinishDate: null
-    }
+  const state = {
+    vincent: null,
+    michelle: null
+  };
 
-};
+  let currentDayKey = berlinDateKey();
+  let unsubscribeToday = null;
+  let firebaseReady = false;
 
+  function showError(message) {
+    const box = document.getElementById("errorBox");
+    box.style.display = "block";
+    box.textContent = message;
+  }
 
-let currentDateKey =
-    getDateKey();
+  function clearError() {
+    const box = document.getElementById("errorBox");
+    box.style.display = "none";
+    box.textContent = "";
+  }
 
+  function setSyncStatus(text) {
+    document.getElementById("syncStatus").textContent = text;
+  }
 
+  function berlinDateParts() {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Berlin",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(new Date());
 
-// =========================================
-// CALCULATE WORK DAY
-// =========================================
+    const get = type => parts.find(p => p.type === type).value;
 
-function calculateWorkDay(person) {
+    return {
+      year: Number(get("year")),
+      month: Number(get("month")),
+      day: Number(get("day"))
+    };
+  }
 
-    const arrivalInput =
-        document.getElementById(
-            `${person}-arrival`
-        ).value;
+  function berlinDateKey() {
+    const p = berlinDateParts();
+    return `${p.year}-${String(p.month).padStart(2, "0")}-${String(p.day).padStart(2, "0")}`;
+  }
 
+  function dateFromBerlinDayAndTime(dayKey, timeString) {
+    const [year, month, day] = dayKey.split("-").map(Number);
+    const [hours, minutes] = timeString.split(":").map(Number);
 
-    const workHours =
-        parseFloat(
-            document.getElementById(
-                `${person}-work`
-            ).value
-        );
+    // This app is intended for use in Germany.
+    // Browsers in Germany will interpret this as local Europe/Berlin time.
+    return new Date(year, month - 1, day, hours, minutes, 0, 0);
+  }
 
+  function formatClock(date) {
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/Berlin",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    }).format(date);
+  }
 
-    const breakMinutes =
-        parseFloat(
-            document.getElementById(
-                `${person}-break`
-            ).value
-        );
+  function formatDuration(ms) {
+    let seconds = Math.floor(Math.abs(ms) / 1000);
 
+    const hours = Math.floor(seconds / 3600);
+    seconds %= 3600;
 
-    if (
-        !arrivalInput ||
-        isNaN(workHours) ||
-        isNaN(breakMinutes) ||
-        workHours < 0 ||
-        breakMinutes < 0
-    ) {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
 
-        alert(
-            "Please fill in all fields correctly."
-        );
-
-        return;
-    }
-
-
-    const today =
-        new Date();
-
-
-    const [hours, minutes] =
-        arrivalInput
-            .split(":")
-            .map(Number);
-
-
-    const arrivalDate =
-        new Date(
-            today.getFullYear(),
-            today.getMonth(),
-            today.getDate(),
-            hours,
-            minutes,
-            0,
-            0
-        );
-
-
-    const workMilliseconds =
-        workHours *
-        60 *
-        60 *
-        1000;
-
-
-    const breakMilliseconds =
-        breakMinutes *
-        60 *
-        1000;
-
-
-    const leaveDate =
-        new Date(
-            arrivalDate.getTime()
-            +
-            workMilliseconds
-            +
-            breakMilliseconds
-        );
-
-
-    people[person].arrivalDate =
-        arrivalDate;
-
-
-    people[person].leaveDate =
-        leaveDate;
-
-
-    /*
-        Starting/updating a countdown
-        means the person is working again.
-    */
-
-    people[person].finished =
-        false;
-
-
-    people[person].actualFinishDate =
-        null;
-
-
-    document.getElementById(
-        `${person}-good-job`
-    ).style.display =
-        "none";
-
-
-    document.getElementById(
-        `${person}-feierabend-button`
-    ).disabled =
-        false;
-
-
-    document.getElementById(
-        `${person}-leave`
-    ).textContent =
-        formatTime(leaveDate);
-
-
-    updateSummary(
-        person,
-        workHours,
-        breakMinutes
+    return (
+      String(hours).padStart(2, "0") + ":" +
+      String(minutes).padStart(2, "0") + ":" +
+      String(secs).padStart(2, "0")
     );
+  }
 
+  function formatWorkHours(decimalHours) {
+    const whole = Math.floor(decimalHours);
+    const minutes = Math.round((decimalHours - whole) * 60);
 
-    savePerson(person);
+    if (minutes === 0) return `${whole}h`;
+    return `${whole}h ${minutes}m`;
+  }
 
+  function currentBerlinTimeForInput() {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/Berlin",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    }).formatToParts(new Date());
 
-    updateCountdown(person);
-}
+    const get = type => parts.find(p => p.type === type).value;
+    return `${get("hour")}:${get("minute")}`;
+  }
 
+  function displayDate() {
+    document.getElementById("todayDate").textContent =
+      new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Europe/Berlin",
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      }).format(new Date());
+  }
 
+  function setDefaultInputs(person) {
+    document.getElementById(`${person}-arrival`).value = currentBerlinTimeForInput();
+    document.getElementById(`${person}-work`).value = "8";
+    document.getElementById(`${person}-break`).value = "30";
+  }
 
-// =========================================
-// FEIERABEND BUTTON
-// =========================================
+  function clearPersonUi(person) {
+    state[person] = null;
 
-function feierabend(person) {
+    setDefaultInputs(person);
 
-    const data =
-        people[person];
+    document.getElementById(`${person}-leave`).textContent = "--:--";
+    document.getElementById(`${person}-countdown`).textContent = "--:--:--";
+    document.getElementById(`${person}-status`).textContent =
+      "Enter today's work information.";
+    document.getElementById(`${person}-good-job`).style.display = "none";
+    document.getElementById(`${person}-progress`).style.width = "0%";
+    document.getElementById(`${person}-progress-text`).textContent = "";
+    document.getElementById(`${person}-summary`).textContent =
+      "No calculation yet.";
+    document.getElementById(`${person}-feierabend-button`).disabled = true;
+  }
 
-
-    if (
-        !data.arrivalDate ||
-        !data.leaveDate
-    ) {
-
-        return;
+  function applyRemotePerson(person, data) {
+    if (!data) {
+      clearPersonUi(person);
+      return;
     }
 
+    state[person] = data;
 
-    /*
-        Freeze the countdown at
-        the exact time button was pressed.
-    */
+    document.getElementById(`${person}-arrival`).value = data.arrival;
+    document.getElementById(`${person}-work`).value = data.workHours;
+    document.getElementById(`${person}-break`).value = data.breakMinutes;
 
-    data.finished =
-        true;
+    document.getElementById(`${person}-leave`).textContent =
+      formatClock(new Date(data.plannedFinishEpoch));
 
-
-    data.actualFinishDate =
-        new Date();
-
-
-    document.getElementById(
-        `${person}-good-job`
-    ).textContent =
-        `Good Job ${data.displayName}! 🎉`;
-
-
-    document.getElementById(
-        `${person}-good-job`
-    ).style.display =
-        "block";
-
-
-    document.getElementById(
-        `${person}-feierabend-button`
-    ).disabled =
-        true;
-
-
-    /*
-        Show the final countdown/overtime
-        value at the moment Feierabend was clicked.
-    */
-
-    renderFinalTime(person);
-
-
-    savePerson(person);
-}
-
-
-
-// =========================================
-// FINAL STOPPED TIME
-// =========================================
-
-function renderFinalTime(person) {
-
-    const data =
-        people[person];
-
-
-    if (
-        !data.actualFinishDate ||
-        !data.leaveDate
-    ) {
-        return;
-    }
-
-
-    const difference =
-        data.leaveDate.getTime()
-        -
-        data.actualFinishDate.getTime();
-
-
-    /*
-        Finished before planned leaving time.
-    */
-
-    if (difference > 0) {
-
-        document.getElementById(
-            `${person}-countdown`
-        ).textContent =
-            formatDuration(difference);
-
-
-        document.getElementById(
-            `${person}-status`
-        ).textContent =
-            `Feierabend at ${formatTime(data.actualFinishDate)}`;
-
-    }
-
-    /*
-        Exactly on time.
-    */
-
-    else if (difference === 0) {
-
-        document.getElementById(
-            `${person}-countdown`
-        ).textContent =
-            "00:00:00";
-
-
-        document.getElementById(
-            `${person}-status`
-        ).textContent =
-            `Feierabend at ${formatTime(data.actualFinishDate)}`;
-
-    }
-
-    /*
-        Finished after planned leaving time.
-    */
-
-    else {
-
-        const overtime =
-            Math.abs(difference);
-
-
-        document.getElementById(
-            `${person}-countdown`
-        ).textContent =
-            "-"
-            +
-            formatDuration(overtime);
-
-
-        document.getElementById(
-            `${person}-status`
-        ).textContent =
-            `Feierabend at ${formatTime(data.actualFinishDate)} • Overtime`;
-
-    }
-
-
-    document.getElementById(
-        `${person}-progress`
-    ).style.width =
-        "100%";
-
-
-    document.getElementById(
-        `${person}-progress-text`
-    ).textContent =
-        "Workday finished";
-
-}
-
-
-
-// =========================================
-// LIVE COUNTDOWN
-// =========================================
-
-function updateCountdown(person) {
-
-    const data =
-        people[person];
-
-
-    if (
-        !data.arrivalDate ||
-        !data.leaveDate
-    ) {
-
-        return;
-    }
-
-
-    /*
-        If Feierabend has already been clicked,
-        do not update anymore.
-    */
+    const goodJob = document.getElementById(`${person}-good-job`);
+    const button = document.getElementById(`${person}-feierabend-button`);
 
     if (data.finished) {
-
-        renderFinalTime(person);
-
-        return;
+      goodJob.textContent = `Good Job ${DISPLAY_NAMES[person]}! 🎉`;
+      goodJob.style.display = "block";
+      button.disabled = true;
+    } else {
+      goodJob.style.display = "none";
+      button.disabled = false;
     }
 
+    renderSummary(person);
+    renderCountdown(person);
+  }
 
-    const now =
-        new Date();
+  function renderSummary(person) {
+    const data = state[person];
+    if (!data) return;
 
+    let extra = "";
 
-    /*
-        BEFORE ARRIVAL
-    */
-
-    if (
-        now <
-        data.arrivalDate
-    ) {
-
-        const untilStart =
-            data.arrivalDate.getTime()
-            -
-            now.getTime();
-
-
-        document.getElementById(
-            `${person}-countdown`
-        ).textContent =
-            formatDuration(untilStart);
-
-
-        document.getElementById(
-            `${person}-status`
-        ).textContent =
-            "until work starts";
-
-
-        document.getElementById(
-            `${person}-progress`
-        ).style.width =
-            "0%";
-
-
-        document.getElementById(
-            `${person}-progress-text`
-        ).textContent =
-            "0% completed";
-
-
-        return;
+    if (data.finished && data.actualFinishEpoch) {
+      extra = `<br>Actual Feierabend: <strong>${formatClock(new Date(data.actualFinishEpoch))}</strong>`;
     }
 
+    document.getElementById(`${person}-summary`).innerHTML = `
+      Arrival: <strong>${data.arrival}</strong><br>
+      Work: <strong>${formatWorkHours(Number(data.workHours))}</strong><br>
+      Break: <strong>${Number(data.breakMinutes)} min</strong><br>
+      Planned Feierabend: <strong>${formatClock(new Date(data.plannedFinishEpoch))}</strong>
+      ${extra}
+    `;
+  }
 
-    const remaining =
-        data.leaveDate.getTime()
-        -
-        now.getTime();
+  function renderCountdown(person) {
+    const data = state[person];
+    if (!data) return;
 
+    const arrival = new Date(data.arrivalEpoch);
+    const plannedFinish = new Date(data.plannedFinishEpoch);
 
-    /*
-        NORMAL COUNTDOWN
-    */
+    if (data.finished && data.actualFinishEpoch) {
+      const actualFinish = new Date(data.actualFinishEpoch);
+      const difference = plannedFinish.getTime() - actualFinish.getTime();
+
+      document.getElementById(`${person}-countdown`).textContent =
+        difference < 0
+          ? "-" + formatDuration(difference)
+          : formatDuration(difference);
+
+      document.getElementById(`${person}-status`).textContent =
+        difference < 0
+          ? `Feierabend at ${formatClock(actualFinish)} • Overtime`
+          : `Feierabend at ${formatClock(actualFinish)}`;
+
+      document.getElementById(`${person}-progress`).style.width = "100%";
+      document.getElementById(`${person}-progress-text`).textContent =
+        "Workday finished";
+
+      return;
+    }
+
+    const now = new Date();
+
+    if (now < arrival) {
+      const untilStart = arrival.getTime() - now.getTime();
+
+      document.getElementById(`${person}-countdown`).textContent =
+        formatDuration(untilStart);
+
+      document.getElementById(`${person}-status`).textContent =
+        "until work starts";
+
+      document.getElementById(`${person}-progress`).style.width = "0%";
+      document.getElementById(`${person}-progress-text`).textContent =
+        "0% completed";
+
+      return;
+    }
+
+    const remaining = plannedFinish.getTime() - now.getTime();
 
     if (remaining >= 0) {
+      document.getElementById(`${person}-countdown`).textContent =
+        formatDuration(remaining);
 
-        document.getElementById(
-            `${person}-countdown`
-        ).textContent =
-            formatDuration(remaining);
+      document.getElementById(`${person}-status`).textContent =
+        "until planned Feierabend";
 
+      const total = plannedFinish.getTime() - arrival.getTime();
+      const elapsed = now.getTime() - arrival.getTime();
+      const pct = Math.max(0, Math.min(100, (elapsed / total) * 100));
 
-        document.getElementById(
-            `${person}-status`
-        ).textContent =
-            "until planned Feierabend";
+      document.getElementById(`${person}-progress`).style.width = `${pct}%`;
+      document.getElementById(`${person}-progress-text`).textContent =
+        `${pct.toFixed(1)}% completed`;
+    } else {
+      document.getElementById(`${person}-countdown`).textContent =
+        "-" + formatDuration(remaining);
 
+      document.getElementById(`${person}-status`).textContent =
+        "OVERTIME • click Feierabend when you leave";
 
-        const totalTime =
-            data.leaveDate.getTime()
-            -
-            data.arrivalDate.getTime();
+      document.getElementById(`${person}-progress`).style.width = "100%";
+      document.getElementById(`${person}-progress-text`).textContent =
+        "Planned workday completed";
+    }
+  }
 
-
-        const elapsed =
-            now.getTime()
-            -
-            data.arrivalDate.getTime();
-
-
-        let percentage =
-            (
-                elapsed /
-                totalTime
-            ) * 100;
-
-
-        percentage =
-            Math.max(
-                0,
-                Math.min(
-                    100,
-                    percentage
-                )
-            );
-
-
-        document.getElementById(
-            `${person}-progress`
-        ).style.width =
-            `${percentage}%`;
-
-
-        document.getElementById(
-            `${person}-progress-text`
-        ).textContent =
-            `${percentage.toFixed(1)}% completed`;
-
+  async function startOrUpdate(person) {
+    if (!firebaseReady) {
+      showError("Firebase is still connecting. Please try again in a moment.");
+      return;
     }
 
-    /*
-        OVERTIME
+    clearError();
 
-        Important:
-        The timer does NOT stop at zero.
-
-        Example:
-        -00:00:01
-        -00:00:02
-        -00:00:03
-        ...
-    */
-
-    else {
-
-        const overtime =
-            Math.abs(remaining);
-
-
-        document.getElementById(
-            `${person}-countdown`
-        ).textContent =
-            "-"
-            +
-            formatDuration(overtime);
-
-
-        document.getElementById(
-            `${person}-status`
-        ).textContent =
-            "OVERTIME • click Feierabend when you leave";
-
-
-        document.getElementById(
-            `${person}-progress`
-        ).style.width =
-            "100%";
-
-
-        document.getElementById(
-            `${person}-progress-text`
-        ).textContent =
-            "Planned workday completed";
-
-    }
-
-}
-
-
-
-// =========================================
-// UPDATE BOTH
-// =========================================
-
-function updateAllCountdowns() {
-
-    const newDateKey =
-        getDateKey();
-
-
-    /*
-        Midnight/new-day detection
-    */
+    const arrival = document.getElementById(`${person}-arrival`).value;
+    const workHours = Number(document.getElementById(`${person}-work`).value);
+    const breakMinutes = Number(document.getElementById(`${person}-break`).value);
 
     if (
-        newDateKey !==
-        currentDateKey
+      !arrival ||
+      !Number.isFinite(workHours) ||
+      !Number.isFinite(breakMinutes) ||
+      workHours < 0 ||
+      breakMinutes < 0
     ) {
-
-        currentDateKey =
-            newDateKey;
-
-
-        resetForNewDay();
-
-
-        return;
+      alert("Please fill in all fields correctly.");
+      return;
     }
 
+    const arrivalDate = dateFromBerlinDayAndTime(currentDayKey, arrival);
+    const plannedFinish =
+      new Date(
+        arrivalDate.getTime() +
+        workHours * 60 * 60 * 1000 +
+        breakMinutes * 60 * 1000
+      );
 
-    updateCountdown(
-        "vincent"
-    );
-
-
-    updateCountdown(
-        "michelle"
-    );
-
-}
-
-
-
-// =========================================
-// SUMMARY
-// =========================================
-
-function updateSummary(
-    person,
-    workHours,
-    breakMinutes
-) {
-
-    const data =
-        people[person];
-
-
-    let extra =
-        "";
-
-
-    if (
-        data.finished &&
-        data.actualFinishDate
-    ) {
-
-        extra = `
-
-            <br>
-
-            Actual Feierabend:
-            <strong>
-                ${formatTime(data.actualFinishDate)}
-            </strong>
-
-        `;
-
-    }
-
-
-    document.getElementById(
-        `${person}-summary`
-    ).innerHTML = `
-
-        Arrival:
-        <strong>
-            ${formatTime(data.arrivalDate)}
-        </strong>
-
-        <br>
-
-        Work:
-        <strong>
-            ${formatWorkHours(workHours)}
-        </strong>
-
-        <br>
-
-        Break:
-        <strong>
-            ${breakMinutes} min
-        </strong>
-
-        <br>
-
-        Planned Feierabend:
-        <strong>
-            ${formatTime(data.leaveDate)}
-        </strong>
-
-        ${extra}
-
-    `;
-
-}
-
-
-
-// =========================================
-// SAVE
-// =========================================
-
-function savePerson(person) {
-
-    const data =
-        people[person];
-
-
-    const savedData = {
-
-        date:
-            getDateKey(),
-
-        arrival:
-            document.getElementById(
-                `${person}-arrival`
-            ).value,
-
-        workHours:
-            document.getElementById(
-                `${person}-work`
-            ).value,
-
-        breakMinutes:
-            document.getElementById(
-                `${person}-break`
-            ).value,
-
-        finished:
-            data.finished,
-
-        actualFinish:
-            data.actualFinishDate
-                ?
-                data.actualFinishDate.toISOString()
-                :
-                null
-
+    const payload = {
+      arrival,
+      workHours,
+      breakMinutes,
+      arrivalEpoch: arrivalDate.getTime(),
+      plannedFinishEpoch: plannedFinish.getTime(),
+      finished: false,
+      actualFinishEpoch: null,
+      updatedAtEpoch: Date.now()
     };
 
-
-    localStorage.setItem(
-
-        `workCountdown-${person}`,
-
-        JSON.stringify(savedData)
-
-    );
-
-}
-
-
-
-// =========================================
-// LOAD
-// =========================================
-
-function loadPerson(person) {
-
-    const saved =
-        localStorage.getItem(
-            `workCountdown-${person}`
-        );
-
-
-    if (!saved) {
-
-        setDefaultValues(person);
-
-        return;
+    try {
+      await setDoc(
+        doc(db, "workdays", currentDayKey),
+        { [person]: payload },
+        { merge: true }
+      );
+    } catch (err) {
+      console.error(err);
+      showError(
+        "Could not save to Firestore. Check that Anonymous Authentication is enabled and your Firestore Rules allow authenticated users to read/write workdays."
+      );
     }
+  }
 
+  async function feierabend(person) {
+    const current = state[person];
+    if (!firebaseReady || !current || current.finished) return;
 
-    let savedData;
+    clearError();
 
+    const payload = {
+      ...current,
+      finished: true,
+      actualFinishEpoch: Date.now(),
+      updatedAtEpoch: Date.now()
+    };
 
     try {
+      await setDoc(
+        doc(db, "workdays", currentDayKey),
+        { [person]: payload },
+        { merge: true }
+      );
+    } catch (err) {
+      console.error(err);
+      showError(
+        "Could not save Feierabend to Firestore. Please check your Firebase setup and Firestore Rules."
+      );
+    }
+  }
 
-        savedData =
-            JSON.parse(saved);
-
+  function subscribeToToday() {
+    if (unsubscribeToday) {
+      unsubscribeToday();
+      unsubscribeToday = null;
     }
 
-    catch {
-
-        localStorage.removeItem(
-            `workCountdown-${person}`
-        );
-
-
-        setDefaultValues(person);
-
-        return;
-    }
-
-
-    /*
-        Yesterday's data?
-        Throw it away.
-    */
-
-    if (
-        savedData.date !==
-        getDateKey()
-    ) {
-
-        localStorage.removeItem(
-            `workCountdown-${person}`
-        );
-
-
-        setDefaultValues(person);
-
-        return;
-    }
-
-
-    document.getElementById(
-        `${person}-arrival`
-    ).value =
-        savedData.arrival;
-
-
-    document.getElementById(
-        `${person}-work`
-    ).value =
-        savedData.workHours;
-
-
-    document.getElementById(
-        `${person}-break`
-    ).value =
-        savedData.breakMinutes;
-
-
-    /*
-        Rebuild arrival and planned
-        leaving times.
-    */
-
-    const today =
-        new Date();
-
-
-    const [hours, minutes] =
-        savedData.arrival
-            .split(":")
-            .map(Number);
-
-
-    people[person].arrivalDate =
-        new Date(
-            today.getFullYear(),
-            today.getMonth(),
-            today.getDate(),
-            hours,
-            minutes,
-            0,
-            0
-        );
-
-
-    const workHours =
-        parseFloat(
-            savedData.workHours
-        );
-
-
-    const breakMinutes =
-        parseFloat(
-            savedData.breakMinutes
-        );
-
-
-    people[person].leaveDate =
-        new Date(
-
-            people[person]
-                .arrivalDate
-                .getTime()
-
-            +
-
-            workHours *
-            60 *
-            60 *
-            1000
-
-            +
-
-            breakMinutes *
-            60 *
-            1000
-
-        );
-
-
-    people[person].finished =
-        savedData.finished === true;
-
-
-    people[person].actualFinishDate =
-        savedData.actualFinish
-            ?
-            new Date(
-                savedData.actualFinish
-            )
-            :
-            null;
-
-
-    document.getElementById(
-        `${person}-leave`
-    ).textContent =
-        formatTime(
-            people[person].leaveDate
-        );
-
-
-    /*
-        Feierabend already clicked earlier?
-    */
-
-    if (
-        people[person].finished
-    ) {
-
-        document.getElementById(
-            `${person}-good-job`
-        ).textContent =
-            `Good Job ${people[person].displayName}! 🎉`;
-
-
-        document.getElementById(
-            `${person}-good-job`
-        ).style.display =
-            "block";
-
-
-        document.getElementById(
-            `${person}-feierabend-button`
-        ).disabled =
-            true;
-
-
-        renderFinalTime(person);
-
-    }
-
-    else {
-
-        document.getElementById(
-            `${person}-feierabend-button`
-        ).disabled =
-            false;
-
-
-        updateCountdown(person);
-
-    }
-
-
-    updateSummary(
-        person,
-        workHours,
-        breakMinutes
-    );
-
-}
-
-
-
-// =========================================
-// NEW DAY
-// =========================================
-
-function resetForNewDay() {
-
-    localStorage.removeItem(
-        "workCountdown-vincent"
-    );
-
-
-    localStorage.removeItem(
-        "workCountdown-michelle"
-    );
-
-
-    resetPerson(
-        "vincent"
-    );
-
-
-    resetPerson(
-        "michelle"
-    );
-
-
-    displayDate();
-
-}
-
-
-
-// =========================================
-// RESET PERSON
-// =========================================
-
-function resetPerson(person) {
-
-    people[person].arrivalDate =
-        null;
-
-
-    people[person].leaveDate =
-        null;
-
-
-    people[person].finished =
-        false;
-
-
-    people[person].actualFinishDate =
-        null;
-
-
-    setDefaultValues(person);
-
-
-    document.getElementById(
-        `${person}-leave`
-    ).textContent =
-        "--:--";
-
-
-    document.getElementById(
-        `${person}-countdown`
-    ).textContent =
-        "--:--:--";
-
-
-    document.getElementById(
-        `${person}-status`
-    ).textContent =
-        "Enter today's work information.";
-
-
-    document.getElementById(
-        `${person}-good-job`
-    ).style.display =
-        "none";
-
-
-    document.getElementById(
-        `${person}-summary`
-    ).textContent =
-        "No calculation yet.";
-
-
-    document.getElementById(
-        `${person}-progress`
-    ).style.width =
-        "0%";
-
-
-    document.getElementById(
-        `${person}-progress-text`
-    ).textContent =
-        "";
-
-
-    document.getElementById(
-        `${person}-feierabend-button`
-    ).disabled =
-        true;
-
-}
-
-
-
-// =========================================
-// DEFAULT VALUES
-// =========================================
-
-function setDefaultValues(person) {
-
-    const now =
-        new Date();
-
-
-    const hours =
-        String(
-            now.getHours()
-        ).padStart(
-            2,
-            "0"
-        );
-
-
-    const minutes =
-        String(
-            now.getMinutes()
-        ).padStart(
-            2,
-            "0"
-        );
-
-
-    document.getElementById(
-        `${person}-arrival`
-    ).value =
-        `${hours}:${minutes}`;
-
-
-    document.getElementById(
-        `${person}-work`
-    ).value =
-        "8";
-
-
-    document.getElementById(
-        `${person}-break`
-    ).value =
-        "30";
-
-}
-
-
-
-// =========================================
-// FORMATTING
-// =========================================
-
-function formatTime(date) {
-
-    return date.toLocaleTimeString(
-        [],
-        {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false
+    setSyncStatus("● Connected • syncing today's workday");
+
+    const todayRef = doc(db, "workdays", currentDayKey);
+
+    unsubscribeToday = onSnapshot(
+      todayRef,
+      snapshot => {
+        clearError();
+
+        if (!snapshot.exists()) {
+          clearPersonUi("vincent");
+          clearPersonUi("michelle");
+          setSyncStatus("● Synced • fresh day");
+          return;
         }
+
+        const data = snapshot.data();
+
+        applyRemotePerson("vincent", data.vincent || null);
+        applyRemotePerson("michelle", data.michelle || null);
+
+        setSyncStatus("● Synced across devices");
+      },
+      error => {
+        console.error(error);
+        setSyncStatus("Sync error");
+        showError(
+          "Firestore could not be read. Make sure Firestore exists and your Rules allow authenticated users to access /workdays/{day}."
+        );
+      }
     );
+  }
 
-}
+  function checkForNewDay() {
+    const newKey = berlinDateKey();
 
+    if (newKey !== currentDayKey) {
+      currentDayKey = newKey;
+      displayDate();
 
-function formatDuration(milliseconds) {
+      clearPersonUi("vincent");
+      clearPersonUi("michelle");
 
-    let totalSeconds =
-        Math.floor(
-            Math.abs(milliseconds) /
-            1000
-        );
-
-
-    const hours =
-        Math.floor(
-            totalSeconds /
-            3600
-        );
-
-
-    const minutes =
-        Math.floor(
-            (
-                totalSeconds %
-                3600
-            )
-            /
-            60
-        );
-
-
-    const seconds =
-        totalSeconds %
-        60;
-
-
-    return (
-
-        String(hours)
-            .padStart(
-                2,
-                "0"
-            )
-
-        +
-
-        ":"
-
-        +
-
-        String(minutes)
-            .padStart(
-                2,
-                "0"
-            )
-
-        +
-
-        ":"
-
-        +
-
-        String(seconds)
-            .padStart(
-                2,
-                "0"
-            )
-
-    );
-
-}
-
-
-function formatWorkHours(
-    decimalHours
-) {
-
-    const hours =
-        Math.floor(
-            decimalHours
-        );
-
-
-    const minutes =
-        Math.round(
-            (
-                decimalHours -
-                hours
-            )
-            *
-            60
-        );
-
-
-    if (
-        minutes === 0
-    ) {
-
-        return `${hours}h`;
-
+      subscribeToToday();
     }
+  }
 
+  window.startOrUpdate = startOrUpdate;
+  window.feierabend = feierabend;
 
-    return `${hours}h ${minutes}m`;
+  displayDate();
+  clearPersonUi("vincent");
+  clearPersonUi("michelle");
 
-}
+  try {
+    await setPersistence(auth, browserLocalPersistence);
+  } catch (err) {
+    console.warn("Could not set persistent auth:", err);
+  }
 
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      firebaseReady = true;
+      subscribeToToday();
+    }
+  });
 
+  if (!auth.currentUser) {
+    try {
+      setSyncStatus("Signing in automatically…");
+      await signInAnonymously(auth);
+    } catch (err) {
+      console.error(err);
+      setSyncStatus("Firebase sign-in failed");
+      showError(
+        "Anonymous Firebase sign-in failed. In Firebase Console, enable Authentication → Sign-in method → Anonymous."
+      );
+    }
+  }
 
-// =========================================
-// DATE
-// =========================================
-
-function getDateKey() {
-
-    const now =
-        new Date();
-
-
-    const year =
-        now.getFullYear();
-
-
-    const month =
-        String(
-            now.getMonth() + 1
-        ).padStart(
-            2,
-            "0"
-        );
-
-
-    const day =
-        String(
-            now.getDate()
-        ).padStart(
-            2,
-            "0"
-        );
-
-
-    return (
-        `${year}-${month}-${day}`
-    );
-
-}
-
-
-function displayDate() {
-
-    document.getElementById(
-        "todayDate"
-    ).textContent =
-        new Date()
-            .toLocaleDateString(
-                undefined,
-                {
-                    weekday:
-                        "long",
-
-                    day:
-                        "numeric",
-
-                    month:
-                        "long",
-
-                    year:
-                        "numeric"
-                }
-            );
-
-}
-
-
-
-// =========================================
-// START PAGE
-// =========================================
-
-displayDate();
-
-
-loadPerson(
-    "vincent"
-);
-
-
-loadPerson(
-    "michelle"
-);
-
-
-/*
-    Both timers update every second.
-*/
-
-setInterval(
-    updateAllCountdowns,
-    1000
-);
-
+  setInterval(() => {
+    checkForNewDay();
+    renderCountdown("vincent");
+    renderCountdown("michelle");
+  }, 1000);
 </script>
 
 </body>
