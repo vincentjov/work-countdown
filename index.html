@@ -222,6 +222,15 @@
       .card { padding: 19px 15px; }
       .countdown { font-size: 31px; }
     }
+  
+    .version-footer {
+      text-align: center;
+      margin-top: 24px;
+      padding-bottom: 6px;
+      color: #999;
+      font-size: 11px;
+    }
+
   </style>
 </head>
 
@@ -230,7 +239,7 @@
   <h1>Work Countdown</h1>
   <div class="date" id="todayDate"></div>
   <div class="sync-status" id="syncStatus">Connecting to Firebase…</div>
-  <div class="sync-status" id="appVersion">Version 2.1 • Michelle break included in 8h</div>
+  <div class="sync-status" id="appVersion"></div>
   <div class="error" id="errorBox"></div>
 
   <div class="dashboard">
@@ -838,6 +847,11 @@
     renderCountdown("michelle");
   }, 1000);
 </script>
+
+
+<div class="version-footer">
+  Version 2.1 • Michelle break included in 8h
+</div>
 
 </body>
 </html>
