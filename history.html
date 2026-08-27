@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Working History</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 28px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: #f3f4f6;
+      color: #1d1d1f;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .back-link {
+      display: inline-block;
+      padding: 10px 14px;
+      border: 1px solid #d6d6d6;
+      border-radius: 10px;
+      background: #fff;
+      color: #1d1d1f;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .subtitle {
+      margin: 0 0 8px;
+      color: #777;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .sync-status {
+      margin-bottom: 20px;
+      color: #666;
+      font-size: 13px;
+    }
+
+    .error {
+      display: none;
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #fff4f4;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .loading, .empty {
+      padding: 28px;
+      border-radius: 18px;
+      background: #fff;
+      text-align: center;
+      color: #777;
+      box-shadow: 0 6px 22px rgba(0,0,0,.06);
+    }
+
+    .day-card {
+      margin-bottom: 18px;
+      padding: 18px;
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 6px 22px rgba(0,0,0,.06);
+    }
+
+    .day-title {
+      margin: 0 0 14px;
+      font-size: 18px;
+    }
+
+    .people-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .person-card {
+      min-width: 0;
+      padding: 15px;
+      border: 1px solid #e7e7e7;
+      border-radius: 14px;
+    }
+
+    .person-card h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .fields {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 5px;
+      color: #666;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      min-height: 42px;
+      padding: 9px 10px;
+      border: 1px solid #ccc;
+      border-radius: 9px;
+      background: #fff;
+      font-size: 15px;
+    }
+
+    .calculated {
+      margin-top: 12px;
+      padding: 11px 12px;
+      border-radius: 10px;
+      background: #f5f5f7;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    button {
+      width: 100%;
+      min-height: 44px;
+      margin-top: 12px;
+      border: 0;
+      border-radius: 10px;
+      background: #1d1d1f;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    button:active { transform: scale(.99); }
+
+    .save-status {
+      min-height: 17px;
+      margin-top: 7px;
+      color: #777;
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .version-footer {
+      text-align: center;
+      margin-top: 24px;
+      padding-bottom: 6px;
+      color: #999;
+      font-size: 11px;
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding:
+          max(16px, env(safe-area-inset-top))
+          14px
+          max(20px, env(safe-area-inset-bottom));
+      }
+
+      .topbar {
+        align-items: flex-start;
+      }
+
+      h1 { font-size: 24px; }
+
+      .people-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .day-card {
+        padding: 14px;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .fields {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<div class="page">
+  <div class="topbar">
+    <h1>Working History</h1>
+    <a class="back-link" href="index.html">← Back to Countdown</a>
+  </div>
+
+  <p class="subtitle">
+    Every saved workday from Firebase appears here. You can correct arrival time,
+    planned hours, break duration, or actual Feierabend and save the changes.
+  </p>
+
+  <div class="sync-status" id="syncStatus">Connecting to Firebase…</div>
+  <div class="error" id="errorBox"></div>
+  <div id="historyContent" class="loading">Loading working history…</div>
+
+  <div class="version-footer">Version 3.0 • Working History</div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+  import {
+    getAuth,
+    signInAnonymously,
+    onAuthStateChanged,
+    setPersistence,
+    browserLocalPersistence
+  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+
+  import {
+    getFirestore,
+    doc,
+    setDoc,
+    collection,
+    getDocs
+  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyB9F6x2uuKoVsBaZmmtj0JPq3ZMQtCIDr4",
+    authDomain: "work-coundown.firebaseapp.com",
+    projectId: "work-coundown",
+    storageBucket: "work-coundown.firebasestorage.app",
+    messagingSenderId: "241683590561",
+    appId: "1:241683590561:web:15d746ae913f92f10e6fe0"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const DISPLAY_NAMES = {
+    vincent: "Vincent",
+    michelle: "Michelle"
+  };
+
+  let firebaseReady = false;
+
+  function setStatus(text) {
+    document.getElementById("syncStatus").textContent = text;
+  }
+
+  function showError(text) {
+    const box = document.getElementById("errorBox");
+    box.style.display = "block";
+    box.textContent = text;
+  }
+
+  function clearError() {
+    const box = document.getElementById("errorBox");
+    box.style.display = "none";
+    box.textContent = "";
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function dateFromDayAndTime(dayKey, timeString) {
+    const [year, month, day] = dayKey.split("-").map(Number);
+    const [hour, minute] = timeString.split(":").map(Number);
+    return new Date(year, month - 1, day, hour, minute, 0, 0);
+  }
+
+  function calculatePlannedFinish(person, arrivalDate, workHours, breakMinutes) {
+    const workMs = Number(workHours) * 60 * 60 * 1000;
+    const breakMs = Number(breakMinutes) * 60 * 1000;
+
+    if (person === "vincent") {
+      return new Date(arrivalDate.getTime() + workMs + breakMs);
+    }
+
+    // Michelle's entered hours already include lunch/break.
+    return new Date(arrivalDate.getTime() + workMs);
+  }
+
+  function calculateActualWorkedMinutes(person, arrivalEpoch, finishEpoch, breakMinutes) {
+    if (!arrivalEpoch || !finishEpoch) return null;
+
+    let workedMs = Number(finishEpoch) - Number(arrivalEpoch);
+
+    // If someone manually enters a finish time after midnight,
+    // treat it as the next day.
+    if (workedMs < 0) workedMs += 24 * 60 * 60 * 1000;
+
+    if (person === "vincent") {
+      workedMs -= Number(breakMinutes || 0) * 60 * 1000;
+    }
+
+    workedMs = Math.max(0, workedMs);
+    return Math.floor(workedMs / 60000);
+  }
+
+  function formatWorkedMinutes(totalMinutes) {
+    if (totalMinutes === null || totalMinutes === undefined) return "—";
+
+    const mins = Math.max(0, Math.floor(Number(totalMinutes)));
+    const hours = Math.floor(mins / 60);
+    const minutes = mins % 60;
+
+    return `${hours}h ${String(minutes).padStart(2, "0")}m`;
+  }
+
+  function formatClock(date) {
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/Berlin",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    }).format(date);
+  }
+
+  function timeInputFromEpoch(epoch) {
+    if (!epoch) return "";
+    return formatClock(new Date(epoch));
+  }
+
+  function prettyDate(dayKey) {
+    const [year, month, day] = dayKey.split("-").map(Number);
+    const date = new Date(year, month - 1, day, 12, 0, 0);
+
+    return new Intl.DateTimeFormat("en-GB", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    }).format(date);
+  }
+
+  function buildPerson(dayKey, person, data) {
+    const id = `${dayKey}-${person}`;
+    const actualFinish = timeInputFromEpoch(data.actualFinishEpoch);
+
+    const actualWorkedMinutes =
+      data.actualWorkedMinutes ??
+      calculateActualWorkedMinutes(
+        person,
+        data.arrivalEpoch,
+        data.actualFinishEpoch,
+        data.breakMinutes
+      );
+
+    const arrivalDate = dateFromDayAndTime(dayKey, data.arrival);
+    const plannedFinish = calculatePlannedFinish(
+      person,
+      arrivalDate,
+      Number(data.workHours),
+      Number(data.breakMinutes)
+    );
+
+    return `
+      <div class="person-card">
+        <h2>${DISPLAY_NAMES[person]}</h2>
+
+        <div class="fields">
+          <div class="field">
+            <label>Arrival</label>
+            <input type="time" id="${id}-arrival" value="${escapeHtml(data.arrival || "")}">
+          </div>
+
+          <div class="field">
+            <label>${person === "michelle" ? "Total hours (incl. break)" : "Work hours"}</label>
+            <input type="number" min="0" step="0.25" id="${id}-work" value="${escapeHtml(data.workHours ?? "")}">
+          </div>
+
+          <div class="field">
+            <label>Break (minutes)</label>
+            <input type="number" min="0" step="1" id="${id}-break" value="${escapeHtml(data.breakMinutes ?? 0)}">
+          </div>
+
+          <div class="field">
+            <label>Actual Feierabend</label>
+            <input type="time" id="${id}-finish" value="${escapeHtml(actualFinish)}">
+          </div>
+        </div>
+
+        <div class="calculated">
+          Planned Feierabend: <strong id="${id}-planned">${formatClock(plannedFinish)}</strong><br>
+          Actually worked: <strong id="${id}-worked">${data.finished && data.actualFinishEpoch ? formatWorkedMinutes(actualWorkedMinutes) : "Not finished"}</strong>
+        </div>
+
+        <button onclick="saveEntry('${dayKey}', '${person}')">Save changes</button>
+        <div class="save-status" id="${id}-status"></div>
+      </div>
+    `;
+  }
+
+  async function loadHistory() {
+    if (!firebaseReady) return;
+
+    clearError();
+    const content = document.getElementById("historyContent");
+    content.className = "loading";
+    content.textContent = "Loading working history…";
+
+    try {
+      const snapshot = await getDocs(collection(db, "workdays"));
+      const days = [];
+
+      snapshot.forEach(snap => {
+        days.push({ dayKey: snap.id, data: snap.data() });
+      });
+
+      days.sort((a, b) => b.dayKey.localeCompare(a.dayKey));
+
+      const cards = days.map(({ dayKey, data }) => {
+        const people = ["vincent", "michelle"]
+          .filter(person => data[person])
+          .map(person => buildPerson(dayKey, person, data[person]))
+          .join("");
+
+        if (!people) return "";
+
+        return `
+          <section class="day-card">
+            <h2 class="day-title">${escapeHtml(prettyDate(dayKey))}</h2>
+            <div class="people-grid">${people}</div>
+          </section>
+        `;
+      }).join("");
+
+      if (!cards) {
+        content.className = "empty";
+        content.textContent = "No saved workdays yet.";
+      } else {
+        content.className = "";
+        content.innerHTML = cards;
+      }
+
+      setStatus("● History synced from Firebase");
+    } catch (err) {
+      console.error(err);
+      content.className = "empty";
+      content.textContent = "Could not load working history.";
+      showError("Could not read Firestore. Check your Firebase connection and Firestore Rules.");
+      setStatus("Sync error");
+    }
+  }
+
+  async function saveEntry(dayKey, person) {
+    const id = `${dayKey}-${person}`;
+    const status = document.getElementById(`${id}-status`);
+
+    const arrival = document.getElementById(`${id}-arrival`).value;
+    const workHours = Number(document.getElementById(`${id}-work`).value);
+    const breakMinutes = Number(document.getElementById(`${id}-break`).value);
+    const finishTime = document.getElementById(`${id}-finish`).value;
+
+    if (!arrival || !Number.isFinite(workHours) || !Number.isFinite(breakMinutes) || workHours < 0 || breakMinutes < 0) {
+      status.textContent = "Please enter valid values.";
+      return;
+    }
+
+    const arrivalDate = dateFromDayAndTime(dayKey, arrival);
+    const plannedFinish = calculatePlannedFinish(person, arrivalDate, workHours, breakMinutes);
+
+    let finished = false;
+    let actualFinishEpoch = null;
+    let actualWorkedMinutes = null;
+
+    if (finishTime) {
+      let finishDate = dateFromDayAndTime(dayKey, finishTime);
+
+      if (finishDate.getTime() < arrivalDate.getTime()) {
+        finishDate = new Date(finishDate.getTime() + 24 * 60 * 60 * 1000);
+      }
+
+      finished = true;
+      actualFinishEpoch = finishDate.getTime();
+      actualWorkedMinutes = calculateActualWorkedMinutes(
+        person,
+        arrivalDate.getTime(),
+        actualFinishEpoch,
+        breakMinutes
+      );
+    }
+
+    const payload = {
+      arrival,
+      workHours,
+      breakMinutes,
+      arrivalEpoch: arrivalDate.getTime(),
+      plannedFinishEpoch: plannedFinish.getTime(),
+      finished,
+      actualFinishEpoch,
+      actualWorkedMinutes,
+      updatedAtEpoch: Date.now()
+    };
+
+    status.textContent = "Saving…";
+
+    try {
+      await setDoc(
+        doc(db, "workdays", dayKey),
+        { [person]: payload },
+        { merge: true }
+      );
+
+      document.getElementById(`${id}-planned`).textContent = formatClock(plannedFinish);
+      document.getElementById(`${id}-worked`).textContent =
+        finished ? formatWorkedMinutes(actualWorkedMinutes) : "Not finished";
+
+      status.textContent = "Saved ✓";
+    } catch (err) {
+      console.error(err);
+      status.textContent = "Could not save.";
+    }
+  }
+
+  window.saveEntry = saveEntry;
+
+  try {
+    await setPersistence(auth, browserLocalPersistence);
+  } catch (err) {
+    console.warn("Could not set persistent auth:", err);
+  }
+
+  onAuthStateChanged(auth, user => {
+    if (user && !firebaseReady) {
+      firebaseReady = true;
+      loadHistory();
+    }
+  });
+
+  if (!auth.currentUser) {
+    try {
+      setStatus("Signing in automatically…");
+      await signInAnonymously(auth);
+    } catch (err) {
+      console.error(err);
+      setStatus("Firebase sign-in failed");
+      showError("Anonymous Firebase sign-in failed. Check that Anonymous Authentication is enabled.");
+    }
+  }
+</script>
+</body>
+</html>
