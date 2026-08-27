@@ -232,29 +232,45 @@
     }
 
   
-    .history-link-wrap {
+    .page-links {
       width: 100%;
-      max-width: 1120px;
+      max-width: 700px;
       margin: 24px auto 0;
-      text-align: center;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
     }
 
-    .history-link {
-      display: inline-block;
-      min-width: 220px;
-      padding: 13px 22px;
+    .page-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 50px;
+      padding: 12px 14px;
       border: 1px solid #d6d6d6;
       border-radius: 10px;
       background: #fff;
       color: #1d1d1f;
       text-decoration: none;
-      font-size: 16px;
+      text-align: center;
+      font-size: 15px;
       font-weight: 650;
       box-shadow: 0 4px 16px rgba(0,0,0,.06);
     }
 
-    .history-link:active {
+    .page-link:active {
       transform: scale(.99);
+    }
+
+    @media (max-width: 390px) {
+      .page-links {
+        gap: 8px;
+      }
+
+      .page-link {
+        padding: 11px 8px;
+        font-size: 13px;
+      }
     }
 
   </style>
@@ -924,12 +940,13 @@
 
 
 
-<div class="history-link-wrap">
-  <a class="history-link" href="history.html">Working History</a>
+<div class="page-links">
+  <a class="page-link" href="history.html">Working History</a>
+  <a class="page-link" href="tomorrow.html">Planning for Tomorrow</a>
 </div>
 
 <div class="version-footer">
-  Version 3.0 • Working History
+  Version 4.0 • History + Tomorrow Planning
 </div>
 
 </body>
