@@ -231,6 +231,32 @@
       font-size: 11px;
     }
 
+  
+    .history-link-wrap {
+      width: 100%;
+      max-width: 1120px;
+      margin: 24px auto 0;
+      text-align: center;
+    }
+
+    .history-link {
+      display: inline-block;
+      min-width: 220px;
+      padding: 13px 22px;
+      border: 1px solid #d6d6d6;
+      border-radius: 10px;
+      background: #fff;
+      color: #1d1d1f;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 650;
+      box-shadow: 0 4px 16px rgba(0,0,0,.06);
+    }
+
+    .history-link:active {
+      transform: scale(.99);
+    }
+
   </style>
 </head>
 
@@ -239,7 +265,6 @@
   <h1>Work Countdown</h1>
   <div class="date" id="todayDate"></div>
   <div class="sync-status" id="syncStatus">Connecting to Firebase…</div>
-  <div class="sync-status" id="appVersion"></div>
   <div class="error" id="errorBox"></div>
 
   <div class="dashboard">
@@ -489,6 +514,32 @@
     return `${whole}h ${minutes}m`;
   }
 
+
+  function calculateActualWorkedMinutes(person, arrivalEpoch, actualFinishEpoch, breakMinutes) {
+    if (!arrivalEpoch || !actualFinishEpoch) return null;
+
+    let workedMs = Number(actualFinishEpoch) - Number(arrivalEpoch);
+
+    // Vincent counts lunch outside his working hours.
+    // Michelle counts her total time including lunch as her working duration.
+    if (person === "vincent") {
+      workedMs -= Number(breakMinutes || 0) * 60 * 1000;
+    }
+
+    workedMs = Math.max(0, workedMs);
+    return Math.floor(workedMs / 60000);
+  }
+
+  function formatWorkedMinutes(totalMinutes) {
+    if (totalMinutes === null || totalMinutes === undefined) return "—";
+
+    const mins = Math.max(0, Math.floor(Number(totalMinutes)));
+    const hours = Math.floor(mins / 60);
+    const minutes = mins % 60;
+
+    return `${hours}h ${String(minutes).padStart(2, "0")}m`;
+  }
+
   function currentBerlinTimeForInput() {
     const parts = new Intl.DateTimeFormat("en-GB", {
       timeZone: "Europe/Berlin",
@@ -573,7 +624,19 @@
     let extra = "";
 
     if (data.finished && data.actualFinishEpoch) {
-      extra = `<br>Actual Feierabend: <strong>${formatClock(new Date(data.actualFinishEpoch))}</strong>`;
+      const actualWorkedMinutes =
+        data.actualWorkedMinutes ??
+        calculateActualWorkedMinutes(
+          person,
+          data.arrivalEpoch,
+          data.actualFinishEpoch,
+          data.breakMinutes
+        );
+
+      extra = `
+        <br>Actual Feierabend: <strong>${formatClock(new Date(data.actualFinishEpoch))}</strong>
+        <br>Actually worked: <strong>${formatWorkedMinutes(actualWorkedMinutes)}</strong>
+      `;
     }
 
     document.getElementById(`${person}-summary`).innerHTML = `
@@ -734,10 +797,21 @@
 
     clearError();
 
+    const actualFinishEpoch = Date.now();
+
+    const actualWorkedMinutes =
+      calculateActualWorkedMinutes(
+        person,
+        current.arrivalEpoch,
+        actualFinishEpoch,
+        current.breakMinutes
+      );
+
     const payload = {
       ...current,
       finished: true,
-      actualFinishEpoch: Date.now(),
+      actualFinishEpoch,
+      actualWorkedMinutes,
       updatedAtEpoch: Date.now()
     };
 
@@ -849,8 +923,13 @@
 </script>
 
 
+
+<div class="history-link-wrap">
+  <a class="history-link" href="history.html">Working History</a>
+</div>
+
 <div class="version-footer">
-  Version 2.1 • Michelle break included in 8h
+  Version 3.0 • Working History
 </div>
 
 </body>
