@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Planning for Tomorrow</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 28px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: #f3f4f6;
+      color: #1d1d1f;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 5px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .back-link {
+      display: inline-block;
+      padding: 10px 14px;
+      border: 1px solid #d6d6d6;
+      border-radius: 10px;
+      background: #fff;
+      color: #1d1d1f;
+      text-decoration: none;
+      white-space: nowrap;
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    .tomorrow-date {
+      margin: 0 0 6px;
+      color: #777;
+      font-size: 14px;
+    }
+
+    .sync-status {
+      margin-bottom: 18px;
+      color: #666;
+      font-size: 13px;
+    }
+
+    .maps-notice {
+      display: none;
+      margin-bottom: 18px;
+      padding: 13px 15px;
+      border-radius: 12px;
+      background: #fff8e8;
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    .error {
+      display: none;
+      margin-bottom: 18px;
+      padding: 13px 15px;
+      border-radius: 12px;
+      background: #fff1f1;
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .card {
+      min-width: 0;
+      padding: 24px;
+      border-radius: 20px;
+      background: #fff;
+      box-shadow: 0 8px 28px rgba(0,0,0,.08);
+    }
+
+    .person-title {
+      margin: 0 0 6px;
+      text-align: center;
+      font-size: 22px;
+    }
+
+    .address-block {
+      margin-bottom: 19px;
+      text-align: center;
+      color: #777;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 46px;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background: #fff;
+      color: #1d1d1f;
+      font-size: 16px;
+    }
+
+    .two-fields {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .office-only {
+      display: none;
+    }
+
+    .office-only.visible {
+      display: block;
+    }
+
+    button {
+      width: 100%;
+      min-height: 48px;
+      border: 0;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 680;
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(.99);
+    }
+
+    .plan-button {
+      margin-top: 4px;
+      background: #1d1d1f;
+      color: #fff;
+    }
+
+    .result {
+      display: none;
+      margin-top: 21px;
+      padding-top: 20px;
+      border-top: 1px solid #e6e6e6;
+    }
+
+    .result.visible {
+      display: block;
+    }
+
+    .headline-result {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .result-box {
+      padding: 14px 10px;
+      border-radius: 13px;
+      background: #f5f5f7;
+      text-align: center;
+    }
+
+    .result-label {
+      margin-bottom: 4px;
+      color: #777;
+      font-size: 12px;
+    }
+
+    .result-time {
+      font-size: 28px;
+      font-weight: 760;
+    }
+
+    .details {
+      margin-bottom: 14px;
+      padding: 13px;
+      border-radius: 12px;
+      background: #fafafa;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .route-summary {
+      margin-bottom: 12px;
+      padding: 12px 13px;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .route-summary strong {
+      display: inline-block;
+      margin-bottom: 2px;
+    }
+
+    .maps-links {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .maps-link {
+      flex: 1;
+      padding: 10px 8px;
+      border: 1px solid #d6d6d6;
+      border-radius: 9px;
+      color: #1d1d1f;
+      text-align: center;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .map-tabs {
+      display: none;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .map-tabs.visible {
+      display: grid;
+    }
+
+    .map-tab {
+      min-height: 40px;
+      background: #ececec;
+      color: #1d1d1f;
+      font-size: 13px;
+    }
+
+    .map {
+      display: none;
+      width: 100%;
+      height: 330px;
+      overflow: hidden;
+      border-radius: 14px;
+      background: #eee;
+    }
+
+    .map.visible {
+      display: block;
+    }
+
+    .map-placeholder {
+      padding: 25px 15px;
+      border-radius: 14px;
+      background: #f5f5f7;
+      color: #777;
+      text-align: center;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .save-note {
+      min-height: 18px;
+      margin-top: 7px;
+      color: #777;
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .version-footer {
+      margin-top: 25px;
+      padding-bottom: 6px;
+      color: #999;
+      text-align: center;
+      font-size: 11px;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        padding:
+          max(16px, env(safe-area-inset-top))
+          14px
+          max(20px, env(safe-area-inset-bottom));
+      }
+
+      .dashboard {
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .card {
+        padding: 20px 17px;
+      }
+
+      .map {
+        height: 300px;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .topbar {
+        gap: 8px;
+      }
+
+      .back-link {
+        padding: 9px 10px;
+        font-size: 12px;
+      }
+
+      .two-fields,
+      .headline-result {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<div class="page">
+  <div class="topbar">
+    <div>
+      <h1>Planning for Tomorrow</h1>
+      <div class="tomorrow-date" id="tomorrowDate"></div>
+    </div>
+
+    <a class="back-link" href="index.html">← Countdown</a>
+  </div>
+
+  <div class="sync-status" id="syncStatus">Connecting to Firebase…</div>
+
+  <div class="maps-notice" id="mapsNotice">
+    Live Google Maps routing is not configured yet. Home Office planning works,
+    but Office Office needs a Google Maps Platform API key in this file.
+  </div>
+
+  <div class="error" id="errorBox"></div>
+
+  <div class="dashboard">
+
+    <!-- Vincent -->
+    <section class="card">
+      <h2 class="person-title">Vincent</h2>
+      <div class="address-block">
+        Home: Selma-Lagerlöf-Str. 10, Berlin<br>
+        Office: Element Materials Technology Berlin, Friedrich-Wöhler-Straße 1, 12489 Berlin
+      </div>
+
+      <div class="field">
+        <label for="vincent-mode">Where will you work?</label>
+        <select id="vincent-mode" onchange="modeChanged('vincent')">
+          <option value="">Choose…</option>
+          <option value="home">Home Office</option>
+          <option value="office">Office Office</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="vincent-start">Desired working start</label>
+        <input type="time" id="vincent-start" value="09:00">
+      </div>
+
+      <div class="two-fields">
+        <div class="field">
+          <label for="vincent-hours">Planned work hours</label>
+          <input type="number" id="vincent-hours" min="0" step="0.25" value="8">
+        </div>
+
+        <div class="field">
+          <label for="vincent-break">Break (minutes)</label>
+          <input type="number" id="vincent-break" min="0" step="1" value="30">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="vincent-ready">Get ready time (minutes)</label>
+        <input
+          type="number"
+          id="vincent-ready"
+          min="0"
+          step="1"
+          value="30"
+          inputmode="numeric"
+        >
+      </div>
+
+      <button class="plan-button" onclick="planTomorrow('vincent')">
+        Plan Tomorrow
+      </button>
+
+      <div class="save-note" id="vincent-save-note"></div>
+
+      <div class="result" id="vincent-result">
+        <div class="headline-result">
+          <div class="result-box">
+            <div class="result-label">Tomorrow you will get up at</div>
+            <div class="result-time" id="vincent-wake">--:--</div>
+          </div>
+
+          <div class="result-box">
+            <div class="result-label">Arrive back home at</div>
+            <div class="result-time" id="vincent-home">--:--</div>
+          </div>
+        </div>
+
+        <div class="details" id="vincent-details"></div>
+        <div class="route-summary" id="vincent-outbound-summary"></div>
+        <div class="route-summary" id="vincent-return-summary"></div>
+
+        <div class="maps-links">
+          <a class="maps-link" id="vincent-outbound-link" target="_blank" rel="noopener">Open route to work</a>
+          <a class="maps-link" id="vincent-return-link" target="_blank" rel="noopener">Open route home</a>
+        </div>
+
+        <div class="map-tabs" id="vincent-map-tabs">
+          <button class="map-tab" onclick="showMapRoute('vincent', 'outbound')">Map: To work</button>
+          <button class="map-tab" onclick="showMapRoute('vincent', 'return')">Map: Back home</button>
+        </div>
+
+        <div class="map" id="vincent-map"></div>
+        <div class="map-placeholder" id="vincent-map-placeholder">
+          Google Maps will appear here after an Office Office plan is calculated.
+        </div>
+      </div>
+    </section>
+
+    <!-- Michelle -->
+    <section class="card">
+      <h2 class="person-title">Michelle</h2>
+      <div class="address-block">
+        Home: Canvas Hamburg, Harburger Ring 6, 21073 Hamburg<br>
+        Office: Zirkusweg 1, 20359 Hamburg
+      </div>
+
+      <div class="field">
+        <label for="michelle-mode">Where will you work?</label>
+        <select id="michelle-mode" onchange="modeChanged('michelle')">
+          <option value="">Choose…</option>
+          <option value="home">Home Office</option>
+          <option value="office">Office Office</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="michelle-start">Desired working start</label>
+        <input type="time" id="michelle-start" value="09:00">
+      </div>
+
+      <div class="field">
+        <label for="michelle-hours">Total workday length (incl. break)</label>
+        <input type="number" id="michelle-hours" min="0" step="0.25" value="8">
+      </div>
+
+      <div class="field">
+        <label for="michelle-ready">Get ready time (minutes)</label>
+        <input
+          type="number"
+          id="michelle-ready"
+          min="0"
+          step="1"
+          value="30"
+          inputmode="numeric"
+        >
+      </div>
+
+      <button class="plan-button" onclick="planTomorrow('michelle')">
+        Plan Tomorrow
+      </button>
+
+      <div class="save-note" id="michelle-save-note"></div>
+
+      <div class="result" id="michelle-result">
+        <div class="headline-result">
+          <div class="result-box">
+            <div class="result-label">Tomorrow you will get up at</div>
+            <div class="result-time" id="michelle-wake">--:--</div>
+          </div>
+
+          <div class="result-box">
+            <div class="result-label">Arrive back home at</div>
+            <div class="result-time" id="michelle-home">--:--</div>
+          </div>
+        </div>
+
+        <div class="details" id="michelle-details"></div>
+        <div class="route-summary" id="michelle-outbound-summary"></div>
+        <div class="route-summary" id="michelle-return-summary"></div>
+
+        <div class="maps-links">
+          <a class="maps-link" id="michelle-outbound-link" target="_blank" rel="noopener">Open route to work</a>
+          <a class="maps-link" id="michelle-return-link" target="_blank" rel="noopener">Open route home</a>
+        </div>
+
+        <div class="map-tabs" id="michelle-map-tabs">
+          <button class="map-tab" onclick="showMapRoute('michelle', 'outbound')">Map: To work</button>
+          <button class="map-tab" onclick="showMapRoute('michelle', 'return')">Map: Back home</button>
+        </div>
+
+        <div class="map" id="michelle-map"></div>
+        <div class="map-placeholder" id="michelle-map-placeholder">
+          Google Maps will appear here after an Office Office plan is calculated.
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="version-footer">Version 4.1 • Editable Get Ready Time</div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+
+  import {
+    getAuth,
+    signInAnonymously,
+    onAuthStateChanged,
+    setPersistence,
+    browserLocalPersistence
+  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+
+  import {
+    getFirestore,
+    doc,
+    setDoc,
+    onSnapshot
+  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyB9F6x2uuKoVsBaZmmtj0JPq3ZMQtCIDr4",
+    authDomain: "work-coundown.firebaseapp.com",
+    projectId: "work-coundown",
+    storageBucket: "work-coundown.firebasestorage.app",
+    messagingSenderId: "241683590561",
+    appId: "1:241683590561:web:15d746ae913f92f10e6fe0"
+  };
+
+  /*
+    IMPORTANT:
+    Create a separate Google Maps Platform browser API key and paste it here.
+
+    Recommended restrictions:
+    Website:
+      https://vincentjov.github.io/*
+
+    APIs:
+      Maps JavaScript API
+      Directions API (Legacy)
+  */
+  const GOOGLE_MAPS_API_KEY = "PASTE_YOUR_GOOGLE_MAPS_API_KEY_HERE";
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const LOCATIONS = {
+    vincent: {
+      home: "Selma-Lagerlöf-Str. 10, Berlin, Germany",
+      office: "Element Materials Technology Berlin, Friedrich-Wöhler-Straße 1, 12489 Berlin, Germany",
+      mapCenter: { lat: 52.46, lng: 13.42 }
+    },
+
+    michelle: {
+      home: "Canvas Hamburg, Harburger Ring 6, 21073 Hamburg, Germany",
+      office: "Zirkusweg 1, 20359 Hamburg, Germany",
+      mapCenter: { lat: 53.52, lng: 9.98 }
+    }
+  };
+
+  const routeCache = {
+    vincent: {
+      map: null,
+      renderer: null,
+      outbound: null,
+      return: null
+    },
+
+    michelle: {
+      map: null,
+      renderer: null,
+      outbound: null,
+      return: null
+    }
+  };
+
+  let firebaseReady = false;
+  let mapsReady = false;
+  let tomorrowKey = getTomorrowKeyBerlin();
+  let unsubscribePlan = null;
+
+  function showError(message) {
+    const box = document.getElementById("errorBox");
+    box.style.display = "block";
+    box.textContent = message;
+  }
+
+  function clearError() {
+    const box = document.getElementById("errorBox");
+    box.style.display = "none";
+    box.textContent = "";
+  }
+
+  function setSyncStatus(message) {
+    document.getElementById("syncStatus").textContent = message;
+  }
+
+  function berlinParts(date = new Date()) {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Berlin",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(date);
+
+    const get = type => Number(parts.find(p => p.type === type).value);
+
+    return {
+      year: get("year"),
+      month: get("month"),
+      day: get("day")
+    };
+  }
+
+  function getTomorrowKeyBerlin() {
+    const p = berlinParts();
+
+    const noonToday = new Date(
+      p.year,
+      p.month - 1,
+      p.day,
+      12,
+      0,
+      0,
+      0
+    );
+
+    const tomorrow = new Date(
+      noonToday.getTime() + 24 * 60 * 60 * 1000
+    );
+
+    const y = tomorrow.getFullYear();
+    const m = String(tomorrow.getMonth() + 1).padStart(2, "0");
+    const d = String(tomorrow.getDate()).padStart(2, "0");
+
+    return `${y}-${m}-${d}`;
+  }
+
+  function displayTomorrowDate() {
+    const [year, month, day] = tomorrowKey.split("-").map(Number);
+
+    const date = new Date(
+      year,
+      month - 1,
+      day,
+      12,
+      0,
+      0,
+      0
+    );
+
+    document.getElementById("tomorrowDate").textContent =
+      new Intl.DateTimeFormat("en-GB", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      }).format(date);
+  }
+
+  function dateFromTomorrowTime(timeString) {
+    const [year, month, day] = tomorrowKey.split("-").map(Number);
+    const [hour, minute] = timeString.split(":").map(Number);
+
+    return new Date(
+      year,
+      month - 1,
+      day,
+      hour,
+      minute,
+      0,
+      0
+    );
+  }
+
+  function formatTime(value) {
+    const date = value instanceof Date ? value : new Date(value);
+
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/Berlin",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    }).format(date);
+  }
+
+  function modeChanged(person) {
+    // Get-ready time stays visible and editable at all times.
+    // It is only used for Office Office.
+    // For Home Office, wake-up remains equal to desired working start.
+  }
+
+  function mapsConfigured() {
+    return (
+      GOOGLE_MAPS_API_KEY &&
+      !GOOGLE_MAPS_API_KEY.includes("PASTE_YOUR")
+    );
+  }
+
+  function loadGoogleMaps() {
+    return new Promise((resolve, reject) => {
+      if (window.google?.maps) {
+        mapsReady = true;
+        resolve();
+        return;
+      }
+
+      if (!mapsConfigured()) {
+        document.getElementById("mapsNotice").style.display = "block";
+        resolve();
+        return;
+      }
+
+      window.__workPlannerGoogleMapsReady = () => {
+        mapsReady = true;
+        resolve();
+      };
+
+      const script = document.createElement("script");
+      script.async = true;
+      script.defer = true;
+      script.src =
+        "https://maps.googleapis.com/maps/api/js" +
+        `?key=${encodeURIComponent(GOOGLE_MAPS_API_KEY)}` +
+        "&v=weekly" +
+        "&callback=__workPlannerGoogleMapsReady";
+
+      script.onerror = () => {
+        reject(new Error("Google Maps JavaScript API failed to load."));
+      };
+
+      document.head.appendChild(script);
+    });
+  }
+
+  function initMap(person) {
+    if (!mapsReady) return;
+
+    const cache = routeCache[person];
+
+    if (cache.map) return;
+
+    const mapElement = document.getElementById(`${person}-map`);
+
+    cache.map = new google.maps.Map(mapElement, {
+      center: LOCATIONS[person].mapCenter,
+      zoom: 11,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: true
+    });
+
+    cache.renderer = new google.maps.DirectionsRenderer({
+      map: cache.map,
+      suppressMarkers: false
+    });
+  }
+
+  function calculatePlannedEnd(person, desiredStart, hours, breakMinutes) {
+    const workMs = Number(hours) * 60 * 60 * 1000;
+
+    if (person === "vincent") {
+      return new Date(
+        desiredStart.getTime() +
+        workMs +
+        Number(breakMinutes || 0) * 60 * 1000
+      );
+    }
+
+    // Michelle's entered duration already includes the break.
+    return new Date(
+      desiredStart.getTime() + workMs
+    );
+  }
+
+  function googleMapsDirectionsUrl(origin, destination) {
+    return (
+      "https://www.google.com/maps/dir/?api=1" +
+      `&origin=${encodeURIComponent(origin)}` +
+      `&destination=${encodeURIComponent(destination)}` +
+      "&travelmode=transit"
+    );
+  }
+
+  function selectArrivalRoute(result, targetArrival) {
+    let bestIndex = 0;
+    let bestScore = Number.POSITIVE_INFINITY;
+
+    result.routes.forEach((route, index) => {
+      const leg = route.legs?.[0];
+      const arrival = leg?.arrival_time?.value;
+
+      if (!arrival) return;
+
+      const difference = targetArrival.getTime() - arrival.getTime();
+
+      // Prefer arriving at or before the desired start.
+      // A route arriving after the desired start gets a very large penalty.
+      const score =
+        difference >= 0
+          ? difference
+          : 24 * 60 * 60 * 1000 + Math.abs(difference);
+
+      if (score < bestScore) {
+        bestScore = score;
+        bestIndex = index;
+      }
+    });
+
+    return bestIndex;
+  }
+
+  function selectDepartureRoute(result, targetDeparture) {
+    let bestIndex = 0;
+    let bestScore = Number.POSITIVE_INFINITY;
+
+    result.routes.forEach((route, index) => {
+      const leg = route.legs?.[0];
+      const departure = leg?.departure_time?.value;
+
+      if (!departure) return;
+
+      const difference = departure.getTime() - targetDeparture.getTime();
+
+      // Prefer the first connection at or after the planned end.
+      const score =
+        difference >= 0
+          ? difference
+          : 24 * 60 * 60 * 1000 + Math.abs(difference);
+
+      if (score < bestScore) {
+        bestScore = score;
+        bestIndex = index;
+      }
+    });
+
+    return bestIndex;
+  }
+
+  function extractTransitLines(route) {
+    const lines = [];
+
+    for (const leg of route.legs || []) {
+      for (const step of leg.steps || []) {
+        const transit = step.transit;
+
+        if (!transit) continue;
+
+        const line =
+          transit.line?.short_name ||
+          transit.line?.name ||
+          transit.line?.vehicle?.name;
+
+        if (line && !lines.includes(line)) {
+          lines.push(line);
+        }
+      }
+    }
+
+    return lines.length ? lines.join(" → ") : "Public transport";
+  }
+
+  async function getOfficeRoutes(person, desiredStart, plannedEnd) {
+    if (!mapsReady) {
+      throw new Error(
+        "Google Maps is not configured yet. Add a Google Maps Platform API key first."
+      );
+    }
+
+    initMap(person);
+
+    const service = new google.maps.DirectionsService();
+
+    const outboundResult = await service.route({
+      origin: LOCATIONS[person].home,
+      destination: LOCATIONS[person].office,
+      travelMode: google.maps.TravelMode.TRANSIT,
+      transitOptions: {
+        arrivalTime: desiredStart
+      },
+      provideRouteAlternatives: true,
+      unitSystem: google.maps.UnitSystem.METRIC
+    });
+
+    const outboundIndex =
+      selectArrivalRoute(outboundResult, desiredStart);
+
+    const outboundRoute =
+      outboundResult.routes[outboundIndex];
+
+    const outboundLeg =
+      outboundRoute.legs[0];
+
+    const returnResult = await service.route({
+      origin: LOCATIONS[person].office,
+      destination: LOCATIONS[person].home,
+      travelMode: google.maps.TravelMode.TRANSIT,
+      transitOptions: {
+        departureTime: plannedEnd
+      },
+      provideRouteAlternatives: true,
+      unitSystem: google.maps.UnitSystem.METRIC
+    });
+
+    const returnIndex =
+      selectDepartureRoute(returnResult, plannedEnd);
+
+    const returnRoute =
+      returnResult.routes[returnIndex];
+
+    const returnLeg =
+      returnRoute.legs[0];
+
+    routeCache[person].outbound = {
+      result: outboundResult,
+      index: outboundIndex
+    };
+
+    routeCache[person].return = {
+      result: returnResult,
+      index: returnIndex
+    };
+
+    return {
+      leaveHome:
+        outboundLeg.departure_time?.value ||
+        new Date(
+          outboundLeg.arrival_time.value.getTime() -
+          outboundLeg.duration.value * 1000
+        ),
+
+      arriveWork:
+        outboundLeg.arrival_time?.value ||
+        desiredStart,
+
+      outboundDuration:
+        outboundLeg.duration?.text || "",
+
+      outboundLines:
+        extractTransitLines(outboundRoute),
+
+      leaveWork:
+        returnLeg.departure_time?.value ||
+        plannedEnd,
+
+      arriveHome:
+        returnLeg.arrival_time?.value ||
+        new Date(
+          returnLeg.departure_time.value.getTime() +
+          returnLeg.duration.value * 1000
+        ),
+
+      returnDuration:
+        returnLeg.duration?.text || "",
+
+      returnLines:
+        extractTransitLines(returnRoute)
+    };
+  }
+
+  function showMapRoute(person, direction) {
+    const cache = routeCache[person];
+    const route = cache[direction];
+
+    if (!mapsReady || !cache.renderer || !route) return;
+
+    cache.renderer.setDirections(route.result);
+    cache.renderer.setRouteIndex(route.index);
+
+    document.getElementById(`${person}-map`).classList.add("visible");
+    document.getElementById(`${person}-map-placeholder`).style.display = "none";
+  }
+
+  function renderPlan(person, plan) {
+    const result = document.getElementById(`${person}-result`);
+    result.classList.add("visible");
+
+    document.getElementById(`${person}-wake`).textContent =
+      formatTime(plan.wakeEpoch);
+
+    document.getElementById(`${person}-home`).textContent =
+      formatTime(plan.arriveHomeEpoch);
+
+    if (plan.mode === "home") {
+      document.getElementById(`${person}-details`).innerHTML = `
+        Work mode: <strong>Home Office</strong><br>
+        Desired start: <strong>${plan.desiredStart}</strong><br>
+        Get ready time: <strong>${plan.getReadyMinutes} min</strong> (not used for Home Office)<br>
+        Planned Feierabend: <strong>${formatTime(plan.plannedEndEpoch)}</strong><br>
+        No commute needed.
+      `;
+
+      document.getElementById(`${person}-outbound-summary`).innerHTML =
+        "<strong>Morning</strong><br>You are already at home — start working at the desired time.";
+
+      document.getElementById(`${person}-return-summary`).innerHTML =
+        "<strong>After work</strong><br>You are already home when your planned workday ends.";
+
+      document.getElementById(`${person}-map-tabs`).classList.remove("visible");
+      document.getElementById(`${person}-map`).classList.remove("visible");
+      document.getElementById(`${person}-map-placeholder`).style.display = "block";
+      document.getElementById(`${person}-map-placeholder`).textContent =
+        "Home Office — no commute map needed.";
+
+    } else {
+      document.getElementById(`${person}-details`).innerHTML = `
+        Work mode: <strong>Office Office</strong><br>
+        Desired start: <strong>${plan.desiredStart}</strong><br>
+        Get ready time: <strong>${plan.getReadyMinutes} min</strong><br>
+        Leave home: <strong>${formatTime(plan.leaveHomeEpoch)}</strong><br>
+        Arrive at work: <strong>${formatTime(plan.arriveWorkEpoch)}</strong><br>
+        Planned Feierabend: <strong>${formatTime(plan.plannedEndEpoch)}</strong><br>
+        Leave work: <strong>${formatTime(plan.leaveWorkEpoch)}</strong>
+      `;
+
+      document.getElementById(`${person}-outbound-summary`).innerHTML = `
+        <strong>To work</strong><br>
+        ${plan.outboundLines || "Public transport"}<br>
+        ${formatTime(plan.leaveHomeEpoch)} → ${formatTime(plan.arriveWorkEpoch)}
+        ${plan.outboundDuration ? ` • ${plan.outboundDuration}` : ""}
+      `;
+
+      document.getElementById(`${person}-return-summary`).innerHTML = `
+        <strong>Back home</strong><br>
+        ${plan.returnLines || "Public transport"}<br>
+        ${formatTime(plan.leaveWorkEpoch)} → ${formatTime(plan.arriveHomeEpoch)}
+        ${plan.returnDuration ? ` • ${plan.returnDuration}` : ""}
+      `;
+
+      document.getElementById(`${person}-map-tabs`).classList.add("visible");
+
+      if (routeCache[person].outbound) {
+        showMapRoute(person, "outbound");
+      } else {
+        document.getElementById(`${person}-map`).classList.remove("visible");
+        document.getElementById(`${person}-map-placeholder`).style.display = "block";
+        document.getElementById(`${person}-map-placeholder`).textContent =
+          "This is a saved plan. Press Plan Tomorrow to refresh the live Google Maps route and show it here.";
+      }
+    }
+
+    const location = LOCATIONS[person];
+
+    document.getElementById(`${person}-outbound-link`).href =
+      googleMapsDirectionsUrl(location.home, location.office);
+
+    document.getElementById(`${person}-return-link`).href =
+      googleMapsDirectionsUrl(location.office, location.home);
+  }
+
+  async function savePlan(person, plan) {
+    const note = document.getElementById(`${person}-save-note`);
+
+    note.textContent = "Saving…";
+
+    try {
+      await setDoc(
+        doc(db, "workdays", tomorrowKey),
+        {
+          [`plan_${person}`]: plan
+        },
+        {
+          merge: true
+        }
+      );
+
+      note.textContent = "Tomorrow's plan saved and synced ✓";
+
+    } catch (error) {
+      console.error(error);
+      note.textContent = "Could not save the plan.";
+    }
+  }
+
+  async function planTomorrow(person) {
+    clearError();
+
+    const mode =
+      document.getElementById(`${person}-mode`).value;
+
+    const desiredStartValue =
+      document.getElementById(`${person}-start`).value;
+
+    const hours =
+      Number(document.getElementById(`${person}-hours`).value);
+
+    const getReadyMinutes =
+      Number(document.getElementById(`${person}-ready`).value);
+
+    let breakMinutes = 0;
+
+    if (person === "vincent") {
+      breakMinutes =
+        Number(document.getElementById("vincent-break").value);
+    }
+
+    if (!mode) {
+      alert("Please choose Home Office or Office Office.");
+      return;
+    }
+
+    if (
+      !desiredStartValue ||
+      !Number.isFinite(hours) ||
+      hours < 0 ||
+      !Number.isFinite(getReadyMinutes) ||
+      getReadyMinutes < 0 ||
+      !Number.isFinite(breakMinutes) ||
+      breakMinutes < 0
+    ) {
+      alert("Please enter valid planning values.");
+      return;
+    }
+
+    const desiredStart =
+      dateFromTomorrowTime(desiredStartValue);
+
+    const plannedEnd =
+      calculatePlannedEnd(
+        person,
+        desiredStart,
+        hours,
+        breakMinutes
+      );
+
+    if (mode === "home") {
+      const plan = {
+        mode,
+        desiredStart: desiredStartValue,
+        hours,
+        breakMinutes,
+        getReadyMinutes,
+        wakeEpoch: desiredStart.getTime(),
+        leaveHomeEpoch: null,
+        arriveWorkEpoch: desiredStart.getTime(),
+        plannedEndEpoch: plannedEnd.getTime(),
+        leaveWorkEpoch: plannedEnd.getTime(),
+        arriveHomeEpoch: plannedEnd.getTime(),
+        outboundDuration: "",
+        outboundLines: "Home Office",
+        returnDuration: "",
+        returnLines: "Home Office",
+        updatedAtEpoch: Date.now()
+      };
+
+      renderPlan(person, plan);
+
+      if (firebaseReady) {
+        await savePlan(person, plan);
+      }
+
+      return;
+    }
+
+    if (!mapsReady) {
+      document.getElementById("mapsNotice").style.display = "block";
+      showError(
+        "Office Office planning needs Google Maps live routing. Add the Google Maps Platform API key to tomorrow.html, then upload the file again."
+      );
+      return;
+    }
+
+    document.getElementById(`${person}-save-note`).textContent =
+      "Checking Google Maps connections…";
+
+    try {
+      const routes =
+        await getOfficeRoutes(
+          person,
+          desiredStart,
+          plannedEnd
+        );
+
+      const wake =
+        new Date(
+          routes.leaveHome.getTime() -
+          getReadyMinutes * 60 * 1000
+        );
+
+      const plan = {
+        mode,
+        desiredStart: desiredStartValue,
+        hours,
+        breakMinutes,
+        getReadyMinutes,
+        wakeEpoch: wake.getTime(),
+        leaveHomeEpoch: routes.leaveHome.getTime(),
+        arriveWorkEpoch: routes.arriveWork.getTime(),
+        plannedEndEpoch: plannedEnd.getTime(),
+        leaveWorkEpoch: routes.leaveWork.getTime(),
+        arriveHomeEpoch: routes.arriveHome.getTime(),
+        outboundDuration: routes.outboundDuration,
+        outboundLines: routes.outboundLines,
+        returnDuration: routes.returnDuration,
+        returnLines: routes.returnLines,
+        updatedAtEpoch: Date.now()
+      };
+
+      renderPlan(person, plan);
+      showMapRoute(person, "outbound");
+
+      if (firebaseReady) {
+        await savePlan(person, plan);
+      }
+
+    } catch (error) {
+      console.error(error);
+
+      document.getElementById(`${person}-save-note`).textContent = "";
+
+      showError(
+        "Google Maps could not calculate the public-transport connection. Check that the Maps JavaScript API, Directions API, billing, and API-key website restriction are configured correctly."
+      );
+    }
+  }
+
+  function applySavedPlan(person, plan) {
+    if (!plan) return;
+
+    document.getElementById(`${person}-mode`).value =
+      plan.mode || "";
+
+    document.getElementById(`${person}-start`).value =
+      plan.desiredStart || "09:00";
+
+    document.getElementById(`${person}-hours`).value =
+      plan.hours ?? 8;
+
+    document.getElementById(`${person}-ready`).value =
+      plan.getReadyMinutes ?? 30;
+
+    if (person === "vincent") {
+      document.getElementById("vincent-break").value =
+        plan.breakMinutes ?? 30;
+    }
+
+    modeChanged(person);
+    renderPlan(person, plan);
+  }
+
+  function subscribeToTomorrowPlan() {
+    if (unsubscribePlan) {
+      unsubscribePlan();
+      unsubscribePlan = null;
+    }
+
+    unsubscribePlan = onSnapshot(
+      doc(db, "workdays", tomorrowKey),
+      snapshot => {
+        if (!snapshot.exists()) {
+          setSyncStatus("● Synced • no saved plan yet");
+          return;
+        }
+
+        const data = snapshot.data();
+
+        applySavedPlan(
+          "vincent",
+          data.plan_vincent || null
+        );
+
+        applySavedPlan(
+          "michelle",
+          data.plan_michelle || null
+        );
+
+        setSyncStatus("● Tomorrow's plan synced across devices");
+      },
+      error => {
+        console.error(error);
+        setSyncStatus("Sync error");
+      }
+    );
+  }
+
+  window.modeChanged = modeChanged;
+  window.planTomorrow = planTomorrow;
+  window.showMapRoute = showMapRoute;
+
+  displayTomorrowDate();
+
+  document.getElementById("vincent-outbound-link").href =
+    googleMapsDirectionsUrl(
+      LOCATIONS.vincent.home,
+      LOCATIONS.vincent.office
+    );
+
+  document.getElementById("vincent-return-link").href =
+    googleMapsDirectionsUrl(
+      LOCATIONS.vincent.office,
+      LOCATIONS.vincent.home
+    );
+
+  document.getElementById("michelle-outbound-link").href =
+    googleMapsDirectionsUrl(
+      LOCATIONS.michelle.home,
+      LOCATIONS.michelle.office
+    );
+
+  document.getElementById("michelle-return-link").href =
+    googleMapsDirectionsUrl(
+      LOCATIONS.michelle.office,
+      LOCATIONS.michelle.home
+    );
+
+  try {
+    await loadGoogleMaps();
+  } catch (error) {
+    console.error(error);
+    document.getElementById("mapsNotice").style.display = "block";
+    showError("Google Maps JavaScript API failed to load.");
+  }
+
+  try {
+    await setPersistence(
+      auth,
+      browserLocalPersistence
+    );
+  } catch (error) {
+    console.warn(
+      "Could not set Firebase persistence:",
+      error
+    );
+  }
+
+  onAuthStateChanged(auth, user => {
+    if (user && !firebaseReady) {
+      firebaseReady = true;
+      subscribeToTomorrowPlan();
+    }
+  });
+
+  if (!auth.currentUser) {
+    try {
+      setSyncStatus("Signing in automatically…");
+      await signInAnonymously(auth);
+    } catch (error) {
+      console.error(error);
+      setSyncStatus("Firebase sign-in failed");
+      showError(
+        "Anonymous Firebase sign-in failed. Check that Anonymous Authentication is enabled."
+      );
+    }
+  }
+</script>
+</body>
+</html>
