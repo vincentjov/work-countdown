@@ -6,37 +6,14 @@
   <title>Planning for Tomorrow</title>
 
   <link rel="manifest" href="./manifest.json">
-
   <meta name="theme-color" content="#f3f4f6">
-
   <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Work Countdown">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
 
-  <meta
-    name="apple-mobile-web-app-capable"
-    content="yes"
-  >
-
-  <meta
-    name="apple-mobile-web-app-status-bar-style"
-    content="default"
-  >
-
-  <meta
-    name="apple-mobile-web-app-title"
-    content="Work Countdown"
-  >
-
-  <link
-    rel="apple-touch-icon"
-    href="./icons/apple-touch-icon.png"
-  >
-
-  <link
-    rel="icon"
-    type="image/png"
-    sizes="192x192"
-    href="./icons/icon-192.png"
-  >
 
   <style>
     * { box-sizing: border-box; }
@@ -448,12 +425,81 @@
       }
     }
 
+  
+    /* -----------------------------------------------------
+       Shared iPhone app navigation
+       ----------------------------------------------------- */
+
+    .mobile-bottom-nav {
+      display: none;
+    }
+
+    @media (max-width: 700px) {
+
+      body {
+        padding-bottom:
+          calc(84px + env(safe-area-inset-bottom));
+      }
+
+      .mobile-bottom-nav {
+        position: fixed;
+        z-index: 9000;
+        left: 8px;
+        right: 8px;
+        bottom: max(7px, env(safe-area-inset-bottom));
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+        min-height: 58px;
+        padding: 6px;
+        border: 1px solid rgba(0,0,0,.08);
+        border-radius: 18px;
+        background: rgba(255,255,255,.94);
+        box-shadow: 0 8px 30px rgba(0,0,0,.15);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+      }
+
+      .mobile-nav-link {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        min-width: 0;
+        border-radius: 12px;
+        color: #777;
+        text-decoration: none;
+        font-size: 9px;
+        font-weight: 650;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .mobile-nav-link.active {
+        background: #f1f1f3;
+        color: #1d1d1f;
+      }
+
+      .mobile-nav-icon {
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      /*
+        The fixed bottom nav replaces the desktop-style
+        "back" button on iPhone.
+      */
+      .topbar .back-link {
+        display: none;
+      }
+    }
+
   </style>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 </head>
 
-<body>
+<body data-app-page="tomorrow">
 <div class="page">
   <div class="topbar">
     <div>
@@ -672,7 +718,26 @@
     Map © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a><br>
     Work Countdown personal project · <a href="https://vincentjov.github.io/work-countdown/" target="_blank" rel="noopener">vincentjov.github.io/work-countdown</a>
   </div>
-  <div class="version-footer">Version 4.5 • Umbrella Rule Fixed</div>
+
+<nav class="mobile-bottom-nav" aria-label="App navigation">
+  <a class="mobile-nav-link" href="index.html">
+    <span class="mobile-nav-icon">⏱️</span>
+    <span>Countdown</span>
+  </a>
+
+  <a class="mobile-nav-link" href="history.html">
+    <span class="mobile-nav-icon">📊</span>
+    <span>History</span>
+  </a>
+
+  <a class="mobile-nav-link active" href="tomorrow.html">
+    <span class="mobile-nav-icon">☀️</span>
+    <span>Tomorrow</span>
+  </a>
+</nav>
+
+
+  <div class="version-footer">Version 5.2 • Unified Navigation + Swipe</div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -1483,42 +1548,188 @@
 </script>
 
 <script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker
+        .register("./service-worker.js")
+        .catch(error => {
+          console.warn("Service Worker registration failed:", error);
+        });
+    });
+  }
+</script>
 
-if ("serviceWorker" in navigator) {
 
-    window.addEventListener(
-        "load",
-        () => {
+<script>
+  /*
+    Mobile swipe navigation:
+      Countdown <- History <- Tomorrow
+    Only active on phone-sized screens.
 
-            navigator
-                .serviceWorker
-                .register(
-                    "./service-worker.js"
-                )
+    Swipes starting on interactive controls or the map
+    are ignored so forms and Leaflet keep working normally.
+  */
+  (() => {
+    const currentPage =
+      document.body.dataset.appPage;
 
-                .then(() => {
+    const pages = [
+      {
+        id: "countdown",
+        href: "index.html"
+      },
+      {
+        id: "history",
+        href: "history.html"
+      },
+      {
+        id: "tomorrow",
+        href: "tomorrow.html"
+      }
+    ];
 
-                    console.log(
-                        "Service Worker registered"
-                    );
+    let startX = 0;
+    let startY = 0;
+    let startTime = 0;
+    let swipeAllowed = false;
 
-                })
+    function isPhone() {
+      return window.matchMedia(
+        "(max-width: 700px)"
+      ).matches;
+    }
 
-                .catch(error => {
+    function isInteractiveTarget(target) {
+      return Boolean(
+        target.closest(
+          [
+            "input",
+            "select",
+            "textarea",
+            "button",
+            "a",
+            ".map",
+            ".leaflet-container",
+            ".settings-panel",
+            ".mobile-bottom-nav"
+          ].join(",")
+        )
+      );
+    }
 
-                    console.error(
-                        "Service Worker error:",
-                        error
-                    );
-
-                });
-
+    document.addEventListener(
+      "touchstart",
+      event => {
+        if (
+          !isPhone() ||
+          event.touches.length !== 1
+        ) {
+          swipeAllowed = false;
+          return;
         }
+
+        if (
+          isInteractiveTarget(
+            event.target
+          )
+        ) {
+          swipeAllowed = false;
+          return;
+        }
+
+        const touch =
+          event.touches[0];
+
+        startX = touch.clientX;
+        startY = touch.clientY;
+        startTime = Date.now();
+        swipeAllowed = true;
+      },
+      {
+        passive: true
+      }
     );
 
-}
+    document.addEventListener(
+      "touchend",
+      event => {
+        if (
+          !swipeAllowed ||
+          !isPhone() ||
+          event.changedTouches.length !== 1
+        ) {
+          swipeAllowed = false;
+          return;
+        }
 
+        const touch =
+          event.changedTouches[0];
+
+        const deltaX =
+          touch.clientX - startX;
+
+        const deltaY =
+          touch.clientY - startY;
+
+        const duration =
+          Date.now() - startTime;
+
+        swipeAllowed = false;
+
+        /*
+          Require a deliberate horizontal swipe:
+          - at least 75 px
+          - horizontal motion clearly larger than vertical
+          - completed within 900 ms
+        */
+        if (
+          Math.abs(deltaX) < 75 ||
+          Math.abs(deltaX) <
+            Math.abs(deltaY) * 1.35 ||
+          duration > 900
+        ) {
+          return;
+        }
+
+        const currentIndex =
+          pages.findIndex(
+            page =>
+              page.id === currentPage
+          );
+
+        if (currentIndex < 0) {
+          return;
+        }
+
+        let targetIndex =
+          currentIndex;
+
+        if (deltaX < 0) {
+          // Swipe left -> next page
+          targetIndex =
+            currentIndex + 1;
+        } else {
+          // Swipe right -> previous page
+          targetIndex =
+            currentIndex - 1;
+        }
+
+        if (
+          targetIndex < 0 ||
+          targetIndex >= pages.length
+        ) {
+          return;
+        }
+
+        window.location.href =
+          pages[targetIndex].href;
+      },
+      {
+        passive: true
+      }
+    );
+  })();
 </script>
-  
+
 </body>
 </html>
