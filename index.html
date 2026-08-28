@@ -435,17 +435,18 @@
       }
 
       /*
-        Two cards next to each other on iPhone.
+        Compact cards stacked vertically on iPhone.
+        This keeps the countdown large and readable.
       */
       .dashboard {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 7px;
+        grid-template-columns: 1fr;
+        gap: 10px;
       }
 
       .card {
         min-width: 0;
-        padding: 10px 7px 11px;
-        border-radius: 15px;
+        padding: 13px 12px 14px;
+        border-radius: 16px;
         box-shadow: 0 4px 15px rgba(0,0,0,.07);
       }
 
@@ -458,8 +459,8 @@
       }
 
       .person-title {
-        margin-bottom: 7px;
-        font-size: 14px;
+        margin-bottom: 8px;
+        font-size: 17px;
         line-height: 1.15;
       }
 
@@ -555,22 +556,24 @@
 
       .edit-button {
         display: block;
-        min-height: 30px;
-        margin: 0 0 7px;
-        padding: 4px 5px;
+        width: auto;
+        min-width: 86px;
+        min-height: 32px;
+        margin: 0 auto 8px;
+        padding: 5px 12px;
         border: 1px solid #dedede;
-        border-radius: 8px;
+        border-radius: 9px;
         background: #fff;
         color: #555;
-        font-size: 10px;
+        font-size: 11px;
       }
 
       .feierabend-button {
-        min-height: 36px;
+        min-height: 42px;
         margin-top: 0;
-        padding: 5px 3px;
-        border-radius: 8px;
-        font-size: 10px;
+        padding: 7px 8px;
+        border-radius: 9px;
+        font-size: 13px;
         line-height: 1.15;
       }
 
@@ -581,35 +584,35 @@
 
       .small-title {
         margin-bottom: 2px;
-        font-size: 8px;
+        font-size: 10px;
       }
 
       .leave-time {
-        margin-bottom: 8px;
-        font-size: 20px;
+        margin-bottom: 9px;
+        font-size: 27px;
       }
 
       .countdown {
-        font-size: clamp(16px, 4.7vw, 20px);
-        letter-spacing: 0;
+        font-size: clamp(30px, 9vw, 38px);
+        letter-spacing: .5px;
       }
 
       .status {
-        min-height: 22px;
-        margin-top: 4px;
-        font-size: 8px;
-        line-height: 1.2;
+        min-height: 18px;
+        margin-top: 5px;
+        font-size: 11px;
+        line-height: 1.25;
       }
 
       .good-job {
-        margin-top: 7px;
-        font-size: 12px;
+        margin-top: 8px;
+        font-size: 15px;
         line-height: 1.2;
       }
 
       .progress-container {
-        height: 5px;
-        margin-top: 8px;
+        height: 6px;
+        margin-top: 10px;
       }
 
       .progress-text {
@@ -689,29 +692,29 @@
 
     @media (max-width: 370px) {
       body {
-        padding-left: 5px;
-        padding-right: 5px;
+        padding-left: 7px;
+        padding-right: 7px;
       }
 
       .dashboard {
-        gap: 5px;
+        gap: 8px;
       }
 
       .card {
-        padding-left: 5px;
-        padding-right: 5px;
+        padding-left: 10px;
+        padding-right: 10px;
       }
 
       .countdown {
-        font-size: 16px;
+        font-size: 29px;
       }
 
       .leave-time {
-        font-size: 18px;
+        font-size: 25px;
       }
 
       .person-title {
-        font-size: 13px;
+        font-size: 16px;
       }
     }
 
@@ -1764,7 +1767,7 @@
 
 
 <div class="version-footer">
-  Version 5.0 • iPhone Compact App Layout
+  Version 5.1 • Compact Stacked iPhone Layout
 </div>
 
 
