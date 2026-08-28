@@ -639,7 +639,7 @@
     Map © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a><br>
     Work Countdown personal project · <a href="https://vincentjov.github.io/work-countdown/" target="_blank" rel="noopener">vincentjov.github.io/work-countdown</a>
   </div>
-  <div class="version-footer">Version 4.4 • Tomorrow Weather</div>
+  <div class="version-footer">Version 4.5 • Umbrella Rule Fixed</div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -1274,24 +1274,11 @@
       );
 
 
-    // "Chance of raining":
-    // require a non-zero precipitation chance AND at least
-    // one rain-type weather code tomorrow. This avoids telling
-    // you to bring an umbrella only because snow is possible.
-    const hasRainTypeWeather =
-      isRainWeatherCode(
-        dailyCode
-      )
-      ||
-      hourlyCodes.some(
-        isRainWeatherCode
-      );
-
-
+    // Umbrella rule:
+    // any precipitation/rain chance above 0% tomorrow
+    // triggers the umbrella reminder.
     const hasRainChance =
-      maxPrecipitationProbability > 0
-      &&
-      hasRainTypeWeather;
+      maxPrecipitationProbability > 0;
 
 
     const presentation =
