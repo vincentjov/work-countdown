@@ -857,14 +857,14 @@
         <span class="mobile-title">Vincent</span>
       </h2>
 
-      <button class="edit-button" onclick="toggleSettings('vincent')">
+      <button type="button" class="edit-button" onclick="toggleSettings('vincent')">
         ⚙️ Edit
       </button>
 
       <div class="settings-panel" id="vincent-settings">
         <div class="settings-sheet-header">
           <div class="settings-sheet-title">Edit Vincent</div>
-          <button class="settings-close" onclick="closeSettings('vincent')">Done</button>
+          <button type="button" class="settings-close" onclick="closeSettings('vincent')">Done</button>
         </div>
 
       <div class="input-group">
@@ -930,14 +930,14 @@
         <span class="mobile-title">Michelle</span>
       </h2>
 
-      <button class="edit-button" onclick="toggleSettings('michelle')">
+      <button type="button" class="edit-button" onclick="toggleSettings('michelle')">
         ⚙️ Edit
       </button>
 
       <div class="settings-panel" id="michelle-settings">
         <div class="settings-sheet-header">
           <div class="settings-sheet-title">Edit Michelle</div>
-          <button class="settings-close" onclick="closeSettings('michelle')">Done</button>
+          <button type="button" class="settings-close" onclick="closeSettings('michelle')">Done</button>
         </div>
 
       <div class="input-group">
@@ -1383,20 +1383,17 @@
       `${person}-settings`
     )?.classList.remove("open");
 
-    const anyOpen =
-      document.querySelector(
-        ".settings-panel.open"
-      );
+    /*
+      Done should always restore the normal page immediately.
+      There is only one settings sheet open at a time.
+    */
+    document.getElementById(
+      "settingsBackdrop"
+    )?.classList.remove("active");
 
-    if (!anyOpen) {
-      document.getElementById(
-        "settingsBackdrop"
-      )?.classList.remove("active");
-
-      document.body.classList.remove(
-        "settings-open"
-      );
-    }
+    document.body.classList.remove(
+      "settings-open"
+    );
   }
 
 
@@ -1874,7 +1871,7 @@
 
 
 <div class="version-footer">
-  Version 5.5 • Edit Panel Fix
+  Version 5.6 • Edit Done Button Fix
 </div>
 
 
@@ -2257,14 +2254,29 @@
     document.addEventListener(
       "touchend",
       event => {
+        /*
+          Important for buttons such as Edit / Done:
+          if the touch started on an interactive control,
+          swipeAllowed is false. In that case we must simply
+          leave the page alone.
+
+          Calling resetPage() here used to briefly add a CSS
+          transform before the browser generated the click event,
+          which could put the settings sheet underneath the blur
+          backdrop and make Done appear unresponsive.
+        */
         if (
           !swipeAllowed ||
           leaving ||
           event.changedTouches.length !== 1
         ) {
           swipeAllowed = false;
+
+          if (horizontalGesture) {
+            resetPage();
+          }
+
           horizontalGesture = false;
-          resetPage();
           return;
         }
 
