@@ -6,37 +6,14 @@
   <title>Work Countdown</title>
 
   <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#f3f4f6">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Work Countdown">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
 
-<meta name="theme-color" content="#f3f4f6">
-
-<meta name="mobile-web-app-capable" content="yes">
-
-<meta
-    name="apple-mobile-web-app-capable"
-    content="yes"
->
-
-<meta
-    name="apple-mobile-web-app-status-bar-style"
-    content="default"
->
-
-<meta
-    name="apple-mobile-web-app-title"
-    content="Work Countdown"
->
-
-<link
-    rel="apple-touch-icon"
-    href="./icons/apple-touch-icon.png"
->
-
-<link
-    rel="icon"
-    type="image/png"
-    sizes="192x192"
-    href="./icons/icon-192.png"
->
 
   <style>
     * { box-sizing: border-box; }
@@ -398,6 +375,346 @@
       }
     }
 
+  
+    /* -----------------------------------------------------
+       iPhone / mobile app layout
+       Desktop stays unchanged.
+       ----------------------------------------------------- */
+
+    .desktop-title {
+      display: inline;
+    }
+
+    .mobile-title {
+      display: none;
+    }
+
+    .edit-button,
+    .settings-sheet-header,
+    .settings-backdrop,
+    .mobile-bottom-nav {
+      display: none;
+    }
+
+    .settings-panel {
+      display: block;
+    }
+
+    @media (max-width: 700px) {
+
+      body {
+        padding:
+          max(10px, env(safe-area-inset-top))
+          7px
+          calc(82px + env(safe-area-inset-bottom));
+      }
+
+      .page {
+        max-width: none;
+      }
+
+      h1 {
+        font-size: 20px;
+        margin-bottom: 2px;
+      }
+
+      .date {
+        font-size: 10px;
+        margin-bottom: 4px;
+      }
+
+      .sync-status {
+        margin-bottom: 10px;
+        font-size: 9px;
+      }
+
+      .error {
+        margin-bottom: 10px;
+        padding: 9px;
+        font-size: 11px;
+      }
+
+      /*
+        Two cards next to each other on iPhone.
+      */
+      .dashboard {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px;
+      }
+
+      .card {
+        min-width: 0;
+        padding: 10px 7px 11px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,.07);
+      }
+
+      .desktop-title {
+        display: none;
+      }
+
+      .mobile-title {
+        display: inline;
+      }
+
+      .person-title {
+        margin-bottom: 7px;
+        font-size: 14px;
+        line-height: 1.15;
+      }
+
+      /*
+        On iPhone the settings are hidden behind Edit.
+        When opened they become a proper centered sheet,
+        so inputs are not squeezed into half the phone width.
+      */
+      .settings-panel {
+        display: none;
+        position: fixed;
+        z-index: 10002;
+        left: 12px;
+        right: 12px;
+        top: max(62px, calc(env(safe-area-inset-top) + 45px));
+        max-height: calc(
+          100dvh - 90px - env(safe-area-inset-bottom)
+        );
+        overflow-y: auto;
+        padding: 17px;
+        border-radius: 20px;
+        background: #fff;
+        box-shadow: 0 20px 70px rgba(0,0,0,.28);
+        text-align: left;
+      }
+
+      .settings-panel.open {
+        display: block;
+      }
+
+      .settings-sheet-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .settings-sheet-title {
+        font-size: 18px;
+        font-weight: 750;
+      }
+
+      .settings-close {
+        width: auto;
+        min-height: 36px;
+        padding: 7px 12px;
+        border-radius: 9px;
+        background: #ececec;
+        color: #1d1d1f;
+        font-size: 13px;
+      }
+
+      .settings-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 10001;
+        background: rgba(0,0,0,.30);
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
+      }
+
+      .settings-backdrop.active {
+        display: block;
+      }
+
+      body.settings-open {
+        overflow: hidden;
+      }
+
+      .settings-panel .input-group {
+        margin-bottom: 13px;
+      }
+
+      .settings-panel label {
+        margin-bottom: 5px;
+        font-size: 13px;
+      }
+
+      .settings-panel input {
+        min-height: 45px;
+        padding: 10px 11px;
+        border-radius: 9px;
+        font-size: 16px;
+      }
+
+      .settings-panel .start-button {
+        min-height: 46px;
+        margin-top: 2px;
+        font-size: 15px;
+      }
+
+      .edit-button {
+        display: block;
+        min-height: 30px;
+        margin: 0 0 7px;
+        padding: 4px 5px;
+        border: 1px solid #dedede;
+        border-radius: 8px;
+        background: #fff;
+        color: #555;
+        font-size: 10px;
+      }
+
+      .feierabend-button {
+        min-height: 36px;
+        margin-top: 0;
+        padding: 5px 3px;
+        border-radius: 8px;
+        font-size: 10px;
+        line-height: 1.15;
+      }
+
+      .result {
+        margin-top: 10px;
+        padding-top: 10px;
+      }
+
+      .small-title {
+        margin-bottom: 2px;
+        font-size: 8px;
+      }
+
+      .leave-time {
+        margin-bottom: 8px;
+        font-size: 20px;
+      }
+
+      .countdown {
+        font-size: clamp(16px, 4.7vw, 20px);
+        letter-spacing: 0;
+      }
+
+      .status {
+        min-height: 22px;
+        margin-top: 4px;
+        font-size: 8px;
+        line-height: 1.2;
+      }
+
+      .good-job {
+        margin-top: 7px;
+        font-size: 12px;
+        line-height: 1.2;
+      }
+
+      .progress-container {
+        height: 5px;
+        margin-top: 8px;
+      }
+
+      .progress-text {
+        display: none;
+      }
+
+      /*
+        Hide the detailed summary on the compact phone cards.
+        Full details still remain on desktop and in Working History.
+      */
+      .summary {
+        display: none;
+      }
+
+      /*
+        Desktop links are replaced on the phone by the
+        fixed app-style bottom navigation.
+      */
+      .page-links {
+        display: none;
+      }
+
+      .version-footer {
+        margin-top: 13px;
+        margin-bottom: 4px;
+        font-size: 8px;
+      }
+
+      .mobile-bottom-nav {
+        position: fixed;
+        z-index: 9000;
+        left: 8px;
+        right: 8px;
+        bottom: max(7px, env(safe-area-inset-bottom));
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+        min-height: 58px;
+        padding: 6px;
+        border: 1px solid rgba(0,0,0,.08);
+        border-radius: 18px;
+        background: rgba(255,255,255,.94);
+        box-shadow: 0 8px 30px rgba(0,0,0,.15);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+      }
+
+      .mobile-nav-link {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        min-width: 0;
+        border-radius: 12px;
+        color: #777;
+        text-decoration: none;
+        font-size: 9px;
+        font-weight: 650;
+      }
+
+      .mobile-nav-link.active {
+        background: #f1f1f3;
+        color: #1d1d1f;
+      }
+
+      .mobile-nav-icon {
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      .celebration-message {
+        max-width: 90vw;
+        padding: 20px 22px;
+      }
+    }
+
+    @media (max-width: 370px) {
+      body {
+        padding-left: 5px;
+        padding-right: 5px;
+      }
+
+      .dashboard {
+        gap: 5px;
+      }
+
+      .card {
+        padding-left: 5px;
+        padding-right: 5px;
+      }
+
+      .countdown {
+        font-size: 16px;
+      }
+
+      .leave-time {
+        font-size: 18px;
+      }
+
+      .person-title {
+        font-size: 13px;
+      }
+    }
+
   </style>
 </head>
 
@@ -413,6 +730,8 @@
   </div>
 </div>
 
+<div class="settings-backdrop" id="settingsBackdrop" onclick="closeAllSettings()"></div>
+
 <div class="page">
   <h1>Work Countdown</h1>
   <div class="date" id="todayDate"></div>
@@ -423,7 +742,20 @@
 
     <!-- Vincent -->
     <div class="card">
-      <h2 class="person-title">Vincent's Work Countdown</h2>
+      <h2 class="person-title">
+        <span class="desktop-title">Vincent's Work Countdown</span>
+        <span class="mobile-title">Vincent</span>
+      </h2>
+
+      <button class="edit-button" onclick="toggleSettings('vincent')">
+        ⚙️ Edit
+      </button>
+
+      <div class="settings-panel" id="vincent-settings">
+        <div class="settings-sheet-header">
+          <div class="settings-sheet-title">Edit Vincent</div>
+          <button class="settings-close" onclick="closeSettings('vincent')">Done</button>
+        </div>
 
       <div class="input-group">
         <label for="vincent-arrival">Arrival time</label>
@@ -443,6 +775,7 @@
       <button class="start-button" onclick="startOrUpdate('vincent')">
         Start / Update Countdown
       </button>
+      </div>
 
       <button
         class="feierabend-button"
@@ -482,7 +815,20 @@
 
     <!-- Michelle -->
     <div class="card">
-      <h2 class="person-title">Michelle's Work Countdown</h2>
+      <h2 class="person-title">
+        <span class="desktop-title">Michelle's Work Countdown</span>
+        <span class="mobile-title">Michelle</span>
+      </h2>
+
+      <button class="edit-button" onclick="toggleSettings('michelle')">
+        ⚙️ Edit
+      </button>
+
+      <div class="settings-panel" id="michelle-settings">
+        <div class="settings-sheet-header">
+          <div class="settings-sheet-title">Edit Michelle</div>
+          <button class="settings-close" onclick="closeSettings('michelle')">Done</button>
+        </div>
 
       <div class="input-group">
         <label for="michelle-arrival">Arrival time</label>
@@ -502,6 +848,7 @@
       <button class="start-button" onclick="startOrUpdate('michelle')">
         Start / Update Countdown
       </button>
+      </div>
 
       <button
         class="feierabend-button"
@@ -891,6 +1238,80 @@
     return new Date(arrivalDate.getTime() + workMs);
   }
 
+
+  function toggleSettings(person) {
+    const panel =
+      document.getElementById(
+        `${person}-settings`
+      );
+
+    if (!panel) return;
+
+    const shouldOpen =
+      !panel.classList.contains(
+        "open"
+      );
+
+    closeAllSettings();
+
+    if (shouldOpen) {
+      panel.classList.add("open");
+
+      document.getElementById(
+        "settingsBackdrop"
+      )?.classList.add("active");
+
+      document.body.classList.add(
+        "settings-open"
+      );
+    }
+  }
+
+
+  function closeSettings(person) {
+    document.getElementById(
+      `${person}-settings`
+    )?.classList.remove("open");
+
+    const anyOpen =
+      document.querySelector(
+        ".settings-panel.open"
+      );
+
+    if (!anyOpen) {
+      document.getElementById(
+        "settingsBackdrop"
+      )?.classList.remove("active");
+
+      document.body.classList.remove(
+        "settings-open"
+      );
+    }
+  }
+
+
+  function closeAllSettings() {
+    document
+      .querySelectorAll(
+        ".settings-panel.open"
+      )
+      .forEach(
+        panel =>
+          panel.classList.remove(
+            "open"
+          )
+      );
+
+    document.getElementById(
+      "settingsBackdrop"
+    )?.classList.remove("active");
+
+    document.body.classList.remove(
+      "settings-open"
+    );
+  }
+
+
   async function startOrUpdate(person) {
     if (!firebaseReady) {
       showError("Firebase is still connecting. Please try again in a moment.");
@@ -935,6 +1356,15 @@
         { [person]: payload },
         { merge: true }
       );
+
+      if (
+        window.matchMedia(
+          "(max-width: 700px)"
+        ).matches
+      ) {
+        closeSettings(person);
+      }
+
     } catch (err) {
       console.error(err);
       showError(
@@ -1263,6 +1693,9 @@
     }
   }
 
+  window.toggleSettings = toggleSettings;
+  window.closeSettings = closeSettings;
+  window.closeAllSettings = closeAllSettings;
   window.startOrUpdate = startOrUpdate;
   window.feierabend = feierabend;
   window.celebrateFeierabend = celebrateFeierabend;
@@ -1311,47 +1744,41 @@
   <a class="page-link" href="tomorrow.html">Planning for Tomorrow</a>
 </div>
 
+
+<nav class="mobile-bottom-nav" aria-label="App navigation">
+  <a class="mobile-nav-link active" href="index.html">
+    <span class="mobile-nav-icon">⏱️</span>
+    <span>Countdown</span>
+  </a>
+
+  <a class="mobile-nav-link" href="history.html">
+    <span class="mobile-nav-icon">📊</span>
+    <span>History</span>
+  </a>
+
+  <a class="mobile-nav-link" href="tomorrow.html">
+    <span class="mobile-nav-icon">☀️</span>
+    <span>Tomorrow</span>
+  </a>
+</nav>
+
+
 <div class="version-footer">
-  Version 4.3 • Feierabend Celebration
+  Version 5.0 • iPhone Compact App Layout
 </div>
 
+
 <script>
-
-if ("serviceWorker" in navigator) {
-
-    window.addEventListener(
-        "load",
-        () => {
-
-            navigator
-                .serviceWorker
-                .register(
-                    "./service-worker.js"
-                )
-
-                .then(() => {
-
-                    console.log(
-                        "Service Worker registered"
-                    );
-
-                })
-
-                .catch(error => {
-
-                    console.error(
-                        "Service Worker error:",
-                        error
-                    );
-
-                });
-
-        }
-    );
-
-}
-
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker
+        .register("./service-worker.js")
+        .catch(error => {
+          console.warn("Service Worker registration failed:", error);
+        });
+    });
+  }
 </script>
-  
+
 </body>
 </html>
