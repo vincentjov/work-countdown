@@ -721,7 +721,7 @@
   </style>
 </head>
 
-<body>
+<body data-app-page="countdown">
 
 <div class="celebration-overlay" id="celebrationOverlay" aria-hidden="true">
   <canvas class="celebration-canvas" id="celebrationCanvas"></canvas>
@@ -1767,7 +1767,7 @@
 
 
 <div class="version-footer">
-  Version 5.1 • Compact Stacked iPhone Layout
+  Version 5.2 • Unified Navigation + Swipe
 </div>
 
 
@@ -1781,6 +1781,178 @@
         });
     });
   }
+</script>
+
+
+<script>
+  /*
+    Mobile swipe navigation:
+      Countdown <- History <- Tomorrow
+    Only active on phone-sized screens.
+
+    Swipes starting on interactive controls or the map
+    are ignored so forms and Leaflet keep working normally.
+  */
+  (() => {
+    const currentPage =
+      document.body.dataset.appPage;
+
+    const pages = [
+      {
+        id: "countdown",
+        href: "index.html"
+      },
+      {
+        id: "history",
+        href: "history.html"
+      },
+      {
+        id: "tomorrow",
+        href: "tomorrow.html"
+      }
+    ];
+
+    let startX = 0;
+    let startY = 0;
+    let startTime = 0;
+    let swipeAllowed = false;
+
+    function isPhone() {
+      return window.matchMedia(
+        "(max-width: 700px)"
+      ).matches;
+    }
+
+    function isInteractiveTarget(target) {
+      return Boolean(
+        target.closest(
+          [
+            "input",
+            "select",
+            "textarea",
+            "button",
+            "a",
+            ".map",
+            ".leaflet-container",
+            ".settings-panel",
+            ".mobile-bottom-nav"
+          ].join(",")
+        )
+      );
+    }
+
+    document.addEventListener(
+      "touchstart",
+      event => {
+        if (
+          !isPhone() ||
+          event.touches.length !== 1
+        ) {
+          swipeAllowed = false;
+          return;
+        }
+
+        if (
+          isInteractiveTarget(
+            event.target
+          )
+        ) {
+          swipeAllowed = false;
+          return;
+        }
+
+        const touch =
+          event.touches[0];
+
+        startX = touch.clientX;
+        startY = touch.clientY;
+        startTime = Date.now();
+        swipeAllowed = true;
+      },
+      {
+        passive: true
+      }
+    );
+
+    document.addEventListener(
+      "touchend",
+      event => {
+        if (
+          !swipeAllowed ||
+          !isPhone() ||
+          event.changedTouches.length !== 1
+        ) {
+          swipeAllowed = false;
+          return;
+        }
+
+        const touch =
+          event.changedTouches[0];
+
+        const deltaX =
+          touch.clientX - startX;
+
+        const deltaY =
+          touch.clientY - startY;
+
+        const duration =
+          Date.now() - startTime;
+
+        swipeAllowed = false;
+
+        /*
+          Require a deliberate horizontal swipe:
+          - at least 75 px
+          - horizontal motion clearly larger than vertical
+          - completed within 900 ms
+        */
+        if (
+          Math.abs(deltaX) < 75 ||
+          Math.abs(deltaX) <
+            Math.abs(deltaY) * 1.35 ||
+          duration > 900
+        ) {
+          return;
+        }
+
+        const currentIndex =
+          pages.findIndex(
+            page =>
+              page.id === currentPage
+          );
+
+        if (currentIndex < 0) {
+          return;
+        }
+
+        let targetIndex =
+          currentIndex;
+
+        if (deltaX < 0) {
+          // Swipe left -> next page
+          targetIndex =
+            currentIndex + 1;
+        } else {
+          // Swipe right -> previous page
+          targetIndex =
+            currentIndex - 1;
+        }
+
+        if (
+          targetIndex < 0 ||
+          targetIndex >= pages.length
+        ) {
+          return;
+        }
+
+        window.location.href =
+          pages[targetIndex].href;
+      },
+      {
+        passive: true
+      }
+    );
+  })();
 </script>
 
 </body>
