@@ -724,9 +724,27 @@
        ----------------------------------------------------- */
 
     @media (max-width: 700px) {
+      /*
+        Important:
+        Do NOT keep transform/will-change permanently on .page.
+        A transformed ancestor creates a stacking context and
+        can trap the fixed Edit settings panel underneath the
+        blur backdrop.
+
+        We only enable transform optimization while the user
+        is actually swiping or during a swipe animation.
+      */
       .page {
+        transform: none;
+      }
+
+      .page.swipe-dragging,
+      .page.swipe-return,
+      .page.swipe-leave-left,
+      .page.swipe-leave-right,
+      .page.swipe-enter-from-right,
+      .page.swipe-enter-from-left {
         will-change: transform, opacity;
-        transform: translateX(0);
       }
 
       .page.swipe-dragging {
@@ -1856,7 +1874,7 @@
 
 
 <div class="version-footer">
-  Version 5.3 • Animated Swipe Navigation
+  Version 5.5 • Edit Panel Fix
 </div>
 
 
@@ -2006,9 +2024,18 @@
             pageElement.classList.remove(
               "swipe-return"
             );
+
+            // Remove the inline transform entirely after the
+            // snap-back animation, so Edit modals are no longer
+            // inside a transformed stacking context.
+            pageElement.style.transform = "";
+            pageElement.style.opacity = "";
           },
           190
         );
+      } else {
+        pageElement.style.transform = "";
+        pageElement.style.opacity = "";
       }
     }
 
@@ -2049,6 +2076,9 @@
               "swipe-enter-from-right",
               "swipe-enter-from-left"
             );
+
+            pageElement.style.transform = "";
+            pageElement.style.opacity = "";
           },
           270
         );
