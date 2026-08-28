@@ -348,6 +348,73 @@
         grid-template-columns: 1fr;
       }
     }
+  
+    .weather-section {
+      margin-bottom: 20px;
+    }
+
+    .weather-title {
+      margin: 0 0 10px;
+      font-size: 18px;
+      font-weight: 750;
+    }
+
+    .weather-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .weather-card {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      align-items: center;
+      min-height: 112px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: 0 6px 22px rgba(0,0,0,.06);
+    }
+
+    .weather-symbol {
+      width: 64px;
+      text-align: center;
+      font-size: 46px;
+      line-height: 1;
+    }
+
+    .weather-person {
+      margin-bottom: 4px;
+      font-size: 15px;
+      font-weight: 750;
+    }
+
+    .weather-main {
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .weather-condition {
+      margin-top: 3px;
+      color: #777;
+      font-size: 12px;
+    }
+
+    .weather-loading {
+      color: #777;
+    }
+
+    @media (max-width: 700px) {
+      .weather-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .weather-card {
+        min-height: 100px;
+      }
+    }
+
   </style>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
@@ -367,6 +434,44 @@
   <div class="sync-status" id="syncStatus">Connecting to Firebase…</div>
 
   <div class="error" id="errorBox"></div>
+
+
+  <section class="weather-section">
+    <h2 class="weather-title">Tomorrow Weather</h2>
+
+    <div class="weather-grid">
+
+      <div class="weather-card">
+        <div class="weather-symbol" id="vincent-weather-symbol">⏳</div>
+
+        <div>
+          <div class="weather-person">For Vincent</div>
+
+          <div class="weather-main weather-loading" id="vincent-weather-text">
+            Loading Berlin forecast…
+          </div>
+
+          <div class="weather-condition" id="vincent-weather-condition"></div>
+        </div>
+      </div>
+
+
+      <div class="weather-card">
+        <div class="weather-symbol" id="michelle-weather-symbol">⏳</div>
+
+        <div>
+          <div class="weather-person">For Michelle</div>
+
+          <div class="weather-main weather-loading" id="michelle-weather-text">
+            Loading Hamburg forecast…
+          </div>
+
+          <div class="weather-condition" id="michelle-weather-condition"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
 
   <div class="dashboard">
 
@@ -534,7 +639,7 @@
     Map © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a><br>
     Work Countdown personal project · <a href="https://vincentjov.github.io/work-countdown/" target="_blank" rel="noopener">vincentjov.github.io/work-countdown</a>
   </div>
-  <div class="version-footer">Version 4.2 • Transitous + OpenStreetMap</div>
+  <div class="version-footer">Version 4.4 • Tomorrow Weather</div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -842,11 +947,515 @@
     }, e=>{console.error(e); setSyncStatus("Sync error");});
   }
 
+
+  // ---------------------------------------------------------
+  // Tomorrow weather — Open-Meteo
+  // No API key or billing required.
+  // ---------------------------------------------------------
+
+  const WEATHER_LOCATIONS = {
+    vincent: {
+      latitude: 52.55,
+      longitude: 13.42,
+      city: "Berlin"
+    },
+
+    michelle: {
+      latitude: 53.46,
+      longitude: 9.98,
+      city: "Hamburg"
+    }
+  };
+
+
+  function isRainWeatherCode(code) {
+    return (
+      (code >= 51 && code <= 67) ||
+      (code >= 80 && code <= 82) ||
+      (code >= 95 && code <= 99)
+    );
+  }
+
+
+  function isSnowWeatherCode(code) {
+    return (
+      (code >= 71 && code <= 77) ||
+      (code >= 85 && code <= 86)
+    );
+  }
+
+
+  function weatherPresentation(dailyCode, hourlyCodes) {
+    const codes = Array.isArray(hourlyCodes)
+      ? hourlyCodes.map(Number)
+      : [];
+
+    // If snow or rain appears at any time tomorrow,
+    // show that more important condition first.
+    if (
+      isSnowWeatherCode(Number(dailyCode)) ||
+      codes.some(isSnowWeatherCode)
+    ) {
+      return {
+        symbol: "❄️",
+        label: "Snowing"
+      };
+    }
+
+
+    if (
+      isRainWeatherCode(Number(dailyCode)) ||
+      codes.some(isRainWeatherCode)
+    ) {
+      return {
+        symbol: "🌧️",
+        label: "Raining"
+      };
+    }
+
+
+    const code = Number(dailyCode);
+
+
+    if (code === 0) {
+      return {
+        symbol: "☀️",
+        label: "Sunny"
+      };
+    }
+
+
+    if (code === 1 || code === 2) {
+      return {
+        symbol: "🌤️",
+        label: "Cloudy sunny"
+      };
+    }
+
+
+    return {
+      symbol: "☁️",
+      label: "Cloudy"
+    };
+  }
+
+
+  function buildWeatherReminder(
+    hasRainChance,
+    temperatureAtEight
+  ) {
+    const needsUmbrella =
+      hasRainChance === true;
+
+
+    const needsJacket =
+      Number.isFinite(
+        Number(temperatureAtEight)
+      )
+      &&
+      Number(temperatureAtEight) < 20;
+
+
+    if (
+      needsUmbrella &&
+      needsJacket
+    ) {
+      return " Don't forget your umbrella and jacket!";
+    }
+
+
+    if (needsUmbrella) {
+      return " Don't forget your umbrella!";
+    }
+
+
+    if (needsJacket) {
+      return " Don't forget your jacket!";
+    }
+
+
+    return "";
+  }
+
+
+  async function fetchTomorrowWeather(person) {
+    const location =
+      WEATHER_LOCATIONS[person];
+
+
+    const url =
+      new URL(
+        "https://api.open-meteo.com/v1/forecast"
+      );
+
+
+    url.searchParams.set(
+      "latitude",
+      location.latitude
+    );
+
+
+    url.searchParams.set(
+      "longitude",
+      location.longitude
+    );
+
+
+    url.searchParams.set(
+      "timezone",
+      "Europe/Berlin"
+    );
+
+
+    url.searchParams.set(
+      "forecast_days",
+      "3"
+    );
+
+
+    url.searchParams.set(
+      "daily",
+      [
+        "weather_code",
+        "temperature_2m_min",
+        "temperature_2m_max",
+        "precipitation_probability_max"
+      ].join(",")
+    );
+
+
+    url.searchParams.set(
+      "hourly",
+      [
+        "temperature_2m",
+        "weather_code",
+        "precipitation_probability"
+      ].join(",")
+    );
+
+
+    const response =
+      await fetch(
+        url.toString(),
+        {
+          headers: {
+            "Accept":
+              "application/json"
+          }
+        }
+      );
+
+
+    if (!response.ok) {
+      throw new Error(
+        `Weather request failed (${response.status}).`
+      );
+    }
+
+
+    const data =
+      await response.json();
+
+
+    const dayIndex =
+      data.daily?.time?.indexOf(
+        tomorrowKey
+      );
+
+
+    if (
+      dayIndex === undefined ||
+      dayIndex < 0
+    ) {
+      throw new Error(
+        "Tomorrow is not available in the weather forecast."
+      );
+    }
+
+
+    const tomorrowHourlyIndexes =
+      [];
+
+
+    for (
+      let i = 0;
+      i < (data.hourly?.time?.length || 0);
+      i++
+    ) {
+      if (
+        String(
+          data.hourly.time[i]
+        ).startsWith(
+          `${tomorrowKey}T`
+        )
+      ) {
+        tomorrowHourlyIndexes.push(i);
+      }
+    }
+
+
+    const hourlyCodes =
+      tomorrowHourlyIndexes.map(
+        i =>
+          Number(
+            data.hourly.weather_code?.[i]
+          )
+      );
+
+
+    const hourlyRainProbabilities =
+      tomorrowHourlyIndexes.map(
+        i =>
+          Number(
+            data.hourly.precipitation_probability?.[i]
+            ??
+            0
+          )
+      );
+
+
+    const morningIndex =
+      data.hourly?.time?.indexOf(
+        `${tomorrowKey}T08:00`
+      );
+
+
+    const temperatureAtEight =
+      morningIndex >= 0
+        ?
+        Number(
+          data.hourly.temperature_2m?.[
+            morningIndex
+          ]
+        )
+        :
+        NaN;
+
+
+    const dailyCode =
+      Number(
+        data.daily.weather_code?.[
+          dayIndex
+        ]
+      );
+
+
+    const minTemp =
+      Math.round(
+        Number(
+          data.daily.temperature_2m_min?.[
+            dayIndex
+          ]
+        )
+      );
+
+
+    const maxTemp =
+      Math.round(
+        Number(
+          data.daily.temperature_2m_max?.[
+            dayIndex
+          ]
+        )
+      );
+
+
+    const maxPrecipitationProbability =
+      Math.max(
+        Number(
+          data.daily.precipitation_probability_max?.[
+            dayIndex
+          ]
+          ??
+          0
+        ),
+
+        ...hourlyRainProbabilities
+      );
+
+
+    // "Chance of raining":
+    // require a non-zero precipitation chance AND at least
+    // one rain-type weather code tomorrow. This avoids telling
+    // you to bring an umbrella only because snow is possible.
+    const hasRainTypeWeather =
+      isRainWeatherCode(
+        dailyCode
+      )
+      ||
+      hourlyCodes.some(
+        isRainWeatherCode
+      );
+
+
+    const hasRainChance =
+      maxPrecipitationProbability > 0
+      &&
+      hasRainTypeWeather;
+
+
+    const presentation =
+      weatherPresentation(
+        dailyCode,
+        hourlyCodes
+      );
+
+
+    return {
+      minTemp,
+      maxTemp,
+      temperatureAtEight,
+      maxPrecipitationProbability,
+      hasRainChance,
+      symbol:
+        presentation.symbol,
+      condition:
+        presentation.label,
+      city:
+        location.city
+    };
+  }
+
+
+  function renderTomorrowWeather(
+    person,
+    forecast
+  ) {
+    const symbol =
+      document.getElementById(
+        `${person}-weather-symbol`
+      );
+
+
+    const text =
+      document.getElementById(
+        `${person}-weather-text`
+      );
+
+
+    const condition =
+      document.getElementById(
+        `${person}-weather-condition`
+      );
+
+
+    symbol.textContent =
+      forecast.symbol;
+
+
+    text.classList.remove(
+      "weather-loading"
+    );
+
+
+    const reminder =
+      buildWeatherReminder(
+        forecast.hasRainChance,
+        forecast.temperatureAtEight
+      );
+
+
+    text.textContent =
+      `Tomorrow will be ${forecast.minTemp} - ${forecast.maxTemp}°C.${reminder}`;
+
+
+    const morningText =
+      Number.isFinite(
+        forecast.temperatureAtEight
+      )
+      ?
+      ` · 08:00: ${Math.round(forecast.temperatureAtEight)}°C`
+      :
+      "";
+
+
+    const rainText =
+      forecast.maxPrecipitationProbability > 0
+      ?
+      ` · Rain chance up to ${Math.round(forecast.maxPrecipitationProbability)}%`
+      :
+      "";
+
+
+    condition.textContent =
+      `${forecast.condition} · ${forecast.city}${morningText}${rainText}`;
+  }
+
+
+  function renderWeatherError(
+    person
+  ) {
+    document.getElementById(
+      `${person}-weather-symbol`
+    ).textContent =
+      "🌡️";
+
+
+    const text =
+      document.getElementById(
+        `${person}-weather-text`
+      );
+
+
+    text.classList.remove(
+      "weather-loading"
+    );
+
+
+    text.textContent =
+      "Tomorrow's weather is currently unavailable.";
+
+
+    document.getElementById(
+      `${person}-weather-condition`
+    ).textContent =
+      "";
+  }
+
+
+  async function loadTomorrowWeather() {
+    await Promise.all(
+      [
+        "vincent",
+        "michelle"
+      ].map(
+        async person => {
+          try {
+            const forecast =
+              await fetchTomorrowWeather(
+                person
+              );
+
+
+            renderTomorrowWeather(
+              person,
+              forecast
+            );
+
+          } catch (error) {
+            console.error(
+              `Weather error for ${person}:`,
+              error
+            );
+
+
+            renderWeatherError(
+              person
+            );
+          }
+        }
+      )
+    );
+  }
+
+
+
   window.modeChanged=modeChanged;
   window.planTomorrow=planTomorrow;
   window.showMapRoute=showMapRoute;
 
   displayTomorrowDate();
+  loadTomorrowWeather();
   try { await setPersistence(auth,browserLocalPersistence); } catch(e) { console.warn(e); }
   onAuthStateChanged(auth,user=>{ if(user && !firebaseReady){firebaseReady=true;subscribeToTomorrowPlan();} });
   if(!auth.currentUser){ try{setSyncStatus("Signing in automatically…");await signInAnonymously(auth);}catch(e){console.error(e);setSyncStatus("Firebase sign-in failed");showError("Anonymous Firebase sign-in failed.");} }
