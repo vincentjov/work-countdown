@@ -583,6 +583,31 @@
       }
     }
 
+  
+    /* -----------------------------------------------------
+       Viewport-fixed mobile app navigation
+       Kept outside .page so long scrolling content and
+       swipe transforms cannot move it.
+       ----------------------------------------------------- */
+    @media (max-width: 700px) {
+      .mobile-bottom-nav {
+        position: fixed !important;
+        z-index: 99999 !important;
+        left: 8px !important;
+        right: 8px !important;
+        bottom: max(7px, env(safe-area-inset-bottom)) !important;
+        display: grid !important;
+        transform: none !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+
+      body {
+        padding-bottom:
+          calc(92px + env(safe-area-inset-bottom)) !important;
+      }
+    }
+
   </style>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
@@ -808,6 +833,11 @@
     Work Countdown personal project · <a href="https://vincentjov.github.io/work-countdown/" target="_blank" rel="noopener">vincentjov.github.io/work-countdown</a>
   </div>
 
+
+
+  <div class="version-footer">Version 5.4 • Fixed App Navigation</div>
+</div>
+
 <nav class="mobile-bottom-nav" aria-label="App navigation">
   <a class="mobile-nav-link" href="index.html">
     <span class="mobile-nav-icon">⏱️</span>
@@ -825,9 +855,6 @@
   </a>
 </nav>
 
-
-  <div class="version-footer">Version 5.3 • Animated Swipe Navigation</div>
-</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
