@@ -283,6 +283,95 @@
       }
     }
 
+  
+    /* -----------------------------------------------------
+       Animated mobile page swiping
+       ----------------------------------------------------- */
+
+    @media (max-width: 700px) {
+      .page {
+        will-change: transform, opacity;
+        transform: translateX(0);
+      }
+
+      .page.swipe-dragging {
+        transition: none !important;
+      }
+
+      .page.swipe-return {
+        transition:
+          transform 180ms cubic-bezier(.2,.8,.2,1),
+          opacity 180ms ease;
+      }
+
+      .page.swipe-leave-left {
+        transform: translateX(-105vw);
+        opacity: .35;
+        transition:
+          transform 220ms cubic-bezier(.4,0,.2,1),
+          opacity 220ms ease;
+      }
+
+      .page.swipe-leave-right {
+        transform: translateX(105vw);
+        opacity: .35;
+        transition:
+          transform 220ms cubic-bezier(.4,0,.2,1),
+          opacity 220ms ease;
+      }
+
+      .page.swipe-enter-from-right {
+        animation:
+          pageEnterFromRight
+          240ms
+          cubic-bezier(.2,.8,.2,1)
+          both;
+      }
+
+      .page.swipe-enter-from-left {
+        animation:
+          pageEnterFromLeft
+          240ms
+          cubic-bezier(.2,.8,.2,1)
+          both;
+      }
+
+      @keyframes pageEnterFromRight {
+        from {
+          transform: translateX(24vw);
+          opacity: .45;
+        }
+
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes pageEnterFromLeft {
+        from {
+          transform: translateX(-24vw);
+          opacity: .45;
+        }
+
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .page.swipe-return,
+        .page.swipe-leave-left,
+        .page.swipe-leave-right,
+        .page.swipe-enter-from-right,
+        .page.swipe-enter-from-left {
+          transition: none !important;
+          animation: none !important;
+        }
+      }
+    }
+
   </style>
 </head>
 
@@ -321,7 +410,7 @@
 </nav>
 
 
-  <div class="version-footer">Version 5.2 • Unified Navigation + Swipe</div>
+  <div class="version-footer">Version 5.3 • Animated Swipe Navigation</div>
 </div>
 
 <script type="module">
@@ -678,14 +767,18 @@
 </script>
 
 
+
 <script>
   /*
-    Mobile swipe navigation:
-      Countdown <- History <- Tomorrow
-    Only active on phone-sized screens.
+    Animated mobile swipe navigation:
 
-    Swipes starting on interactive controls or the map
-    are ignored so forms and Leaflet keep working normally.
+      Countdown <- History <- Tomorrow
+
+    The page follows the finger while swiping.
+    If the swipe is far enough, it slides out and
+    the destination page slides in.
+
+    Bottom navigation stays fixed.
   */
   (() => {
     const currentPage =
@@ -706,10 +799,25 @@
       }
     ];
 
+    const pageElement =
+      document.querySelector(
+        ".page"
+      );
+
+    if (!pageElement) {
+      return;
+    }
+
     let startX = 0;
     let startY = 0;
+    let currentX = 0;
     let startTime = 0;
     let swipeAllowed = false;
+    let horizontalGesture = false;
+    let leaving = false;
+
+    const SWIPE_THRESHOLD = 72;
+    const MAX_DURATION = 1000;
 
     function isPhone() {
       return window.matchMedia(
@@ -735,10 +843,157 @@
       );
     }
 
+    function currentIndex() {
+      return pages.findIndex(
+        page =>
+          page.id === currentPage
+      );
+    }
+
+    function canNavigateForDelta(deltaX) {
+      const index =
+        currentIndex();
+
+      if (index < 0) {
+        return false;
+      }
+
+      if (
+        deltaX < 0 &&
+        index >= pages.length - 1
+      ) {
+        return false;
+      }
+
+      if (
+        deltaX > 0 &&
+        index <= 0
+      ) {
+        return false;
+      }
+
+      return true;
+    }
+
+    function resetPage(animated = true) {
+      pageElement.classList.remove(
+        "swipe-dragging",
+        "swipe-leave-left",
+        "swipe-leave-right"
+      );
+
+      if (animated) {
+        pageElement.classList.add(
+          "swipe-return"
+        );
+      }
+
+      pageElement.style.transform =
+        "translateX(0px)";
+
+      pageElement.style.opacity =
+        "1";
+
+      if (animated) {
+        window.setTimeout(
+          () => {
+            pageElement.classList.remove(
+              "swipe-return"
+            );
+          },
+          190
+        );
+      }
+    }
+
+    function showEntranceAnimation() {
+      if (!isPhone()) {
+        return;
+      }
+
+      const direction =
+        sessionStorage.getItem(
+          "workCountdownSwipeDirection"
+        );
+
+      sessionStorage.removeItem(
+        "workCountdownSwipeDirection"
+      );
+
+      if (
+        direction === "left"
+      ) {
+        pageElement.classList.add(
+          "swipe-enter-from-right"
+        );
+      }
+
+      if (
+        direction === "right"
+      ) {
+        pageElement.classList.add(
+          "swipe-enter-from-left"
+        );
+      }
+
+      if (direction) {
+        window.setTimeout(
+          () => {
+            pageElement.classList.remove(
+              "swipe-enter-from-right",
+              "swipe-enter-from-left"
+            );
+          },
+          270
+        );
+      }
+    }
+
+    function navigateWithAnimation(
+      targetIndex,
+      direction
+    ) {
+      if (leaving) {
+        return;
+      }
+
+      leaving = true;
+
+      pageElement.classList.remove(
+        "swipe-dragging",
+        "swipe-return"
+      );
+
+      const leaveClass =
+        direction === "left"
+          ? "swipe-leave-left"
+          : "swipe-leave-right";
+
+      pageElement.classList.add(
+        leaveClass
+      );
+
+      sessionStorage.setItem(
+        "workCountdownSwipeDirection",
+        direction
+      );
+
+      window.setTimeout(
+        () => {
+          window.location.href =
+            pages[targetIndex].href;
+        },
+        205
+      );
+    }
+
+    showEntranceAnimation();
+
     document.addEventListener(
       "touchstart",
       event => {
         if (
+          leaving ||
           !isPhone() ||
           event.touches.length !== 1
         ) {
@@ -760,11 +1015,106 @@
 
         startX = touch.clientX;
         startY = touch.clientY;
+        currentX = 0;
         startTime = Date.now();
         swipeAllowed = true;
+        horizontalGesture = false;
+
+        pageElement.classList.remove(
+          "swipe-return"
+        );
       },
       {
         passive: true
+      }
+    );
+
+    document.addEventListener(
+      "touchmove",
+      event => {
+        if (
+          !swipeAllowed ||
+          leaving ||
+          event.touches.length !== 1
+        ) {
+          return;
+        }
+
+        const touch =
+          event.touches[0];
+
+        const deltaX =
+          touch.clientX - startX;
+
+        const deltaY =
+          touch.clientY - startY;
+
+        if (!horizontalGesture) {
+          /*
+            Do not take over normal vertical scrolling.
+            Only start dragging when horizontal movement
+            clearly dominates.
+          */
+          if (
+            Math.abs(deltaX) < 10
+          ) {
+            return;
+          }
+
+          if (
+            Math.abs(deltaX) <=
+            Math.abs(deltaY) * 1.15
+          ) {
+            swipeAllowed = false;
+            resetPage(false);
+            return;
+          }
+
+          horizontalGesture = true;
+
+          pageElement.classList.add(
+            "swipe-dragging"
+          );
+        }
+
+        event.preventDefault();
+
+        let visualDelta =
+          deltaX;
+
+        /*
+          At the first / last page there is no page
+          beyond the edge, so add rubber-band resistance.
+        */
+        if (
+          !canNavigateForDelta(
+            deltaX
+          )
+        ) {
+          visualDelta =
+            deltaX * 0.22;
+        }
+
+        currentX =
+          visualDelta;
+
+        const progress =
+          Math.min(
+            Math.abs(visualDelta) /
+              window.innerWidth,
+            1
+          );
+
+        pageElement.style.transform =
+          `translateX(${visualDelta}px)`;
+
+        pageElement.style.opacity =
+          String(
+            1 - progress * 0.22
+          );
+      },
+      {
+        passive: false
       }
     );
 
@@ -773,10 +1123,12 @@
       event => {
         if (
           !swipeAllowed ||
-          !isPhone() ||
+          leaving ||
           event.changedTouches.length !== 1
         ) {
           swipeAllowed = false;
+          horizontalGesture = false;
+          resetPage();
           return;
         }
 
@@ -793,54 +1145,58 @@
           Date.now() - startTime;
 
         swipeAllowed = false;
+        horizontalGesture = false;
 
-        /*
-          Require a deliberate horizontal swipe:
-          - at least 75 px
-          - horizontal motion clearly larger than vertical
-          - completed within 900 ms
-        */
-        if (
-          Math.abs(deltaX) < 75 ||
-          Math.abs(deltaX) <
-            Math.abs(deltaY) * 1.35 ||
-          duration > 900
-        ) {
-          return;
-        }
-
-        const currentIndex =
-          pages.findIndex(
-            page =>
-              page.id === currentPage
+        const validHorizontalSwipe =
+          Math.abs(deltaX) >=
+            SWIPE_THRESHOLD
+          &&
+          Math.abs(deltaX) >
+            Math.abs(deltaY) * 1.25
+          &&
+          duration <=
+            MAX_DURATION
+          &&
+          canNavigateForDelta(
+            deltaX
           );
 
-        if (currentIndex < 0) {
+        if (
+          !validHorizontalSwipe
+        ) {
+          resetPage();
           return;
         }
 
-        let targetIndex =
-          currentIndex;
+        const index =
+          currentIndex();
 
         if (deltaX < 0) {
-          // Swipe left -> next page
-          targetIndex =
-            currentIndex + 1;
+          navigateWithAnimation(
+            index + 1,
+            "left"
+          );
         } else {
-          // Swipe right -> previous page
-          targetIndex =
-            currentIndex - 1;
+          navigateWithAnimation(
+            index - 1,
+            "right"
+          );
         }
+      },
+      {
+        passive: true
+      }
+    );
 
-        if (
-          targetIndex < 0 ||
-          targetIndex >= pages.length
-        ) {
-          return;
+    document.addEventListener(
+      "touchcancel",
+      () => {
+        swipeAllowed = false;
+        horizontalGesture = false;
+
+        if (!leaving) {
+          resetPage();
         }
-
-        window.location.href =
-          pages[targetIndex].href;
       },
       {
         passive: true
@@ -848,6 +1204,7 @@
     );
   })();
 </script>
+
 
 </body>
 </html>
