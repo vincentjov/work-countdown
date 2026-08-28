@@ -372,6 +372,31 @@
       }
     }
 
+  
+    /* -----------------------------------------------------
+       Viewport-fixed mobile app navigation
+       Kept outside .page so long scrolling content and
+       swipe transforms cannot move it.
+       ----------------------------------------------------- */
+    @media (max-width: 700px) {
+      .mobile-bottom-nav {
+        position: fixed !important;
+        z-index: 99999 !important;
+        left: 8px !important;
+        right: 8px !important;
+        bottom: max(7px, env(safe-area-inset-bottom)) !important;
+        display: grid !important;
+        transform: none !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+
+      body {
+        padding-bottom:
+          calc(92px + env(safe-area-inset-bottom)) !important;
+      }
+    }
+
   </style>
 </head>
 
@@ -392,6 +417,11 @@
   <div id="historyContent" class="loading">Loading working history…</div>
 
 
+
+
+  <div class="version-footer">Version 5.4 • Fixed App Navigation</div>
+</div>
+
 <nav class="mobile-bottom-nav" aria-label="App navigation">
   <a class="mobile-nav-link" href="index.html">
     <span class="mobile-nav-icon">⏱️</span>
@@ -409,9 +439,6 @@
   </a>
 </nav>
 
-
-  <div class="version-footer">Version 5.3 • Animated Swipe Navigation</div>
-</div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
